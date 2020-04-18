@@ -165,6 +165,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
      * @param name
      * @param value
      */
+    @Override
     public void setAttribute(String name, Object value) {
         super.setAttribute(name, value);
         SessionAttributeState attributeState = getAttributeState(name);
@@ -208,6 +209,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
      *
      * @param name
      */
+    @Override
     public void removeAttribute(String name) {
 
 
@@ -282,6 +284,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
     /**
      * return isDirty
      */
+    @Override
     public boolean isDirty() {
         return this.dirtyFlag;
     }
@@ -291,6 +294,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
      *
      * @param isDirty
      */
+    @Override
     public void setDirty(boolean isDirty) {
         this.dirtyFlag = isDirty;
     }
