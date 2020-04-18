@@ -88,18 +88,15 @@ class FullHASession extends BaseHASession {
     @Override
     public void removeAttribute(final String name) {
         super.removeAttribute(name);
-        setDirty(true);
     }
 
     @Override
     public void setAttribute(final String name, final Object value) {
         super.setAttribute(name, value);
-        setDirty(true);
     }
 
     @Override
     public Object getAttribute(final String name) {
-        setDirty(true);
         return super.getAttribute(name);
     }
 }
