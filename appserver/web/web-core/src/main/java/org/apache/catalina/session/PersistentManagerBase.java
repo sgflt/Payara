@@ -244,7 +244,7 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
      * session identifier.
      */
     protected ConcurrentHashMap<String, Long> invalidatedSessions
-        = new ConcurrentHashMap<String, Long>();
+        = new ConcurrentHashMap<>();
 
     // Specifies for how long we're going to remember invalidated session ids
     private long rememberInvalidatedSessionIdMilliSecs = 60000L;
