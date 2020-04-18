@@ -155,11 +155,6 @@ public class ModifiedAttributeHASession extends BaseHASession {
         this.attributeStates.clear();
     }
 
-    //this method should only be used for testing
-    public void privateResetAttributeState() {
-        this.resetAttributeState();
-    }
-
     /**
      * this method called when session is loaded from persistent store
      * or after session state was stored
