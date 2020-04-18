@@ -61,9 +61,8 @@ import java.security.Principal;
 import java.util.Enumeration;
 
 /**
- *
- * @author  lwhite
- * @author  Rajiv Mordani
+ * @author lwhite
+ * @author Rajiv Mordani
  */
 public abstract class BaseHASession extends StandardSession
     implements HASession {
@@ -71,7 +70,9 @@ public abstract class BaseHASession extends StandardSession
     protected String userName = "";
     protected boolean persistentFlag = false;
 
-    /** Creates a new instance of BaseHASession */
+    /**
+     * Creates a new instance of BaseHASession
+     */
     public BaseHASession(Manager manager) {
         super(manager);
     }
@@ -86,7 +87,7 @@ public abstract class BaseHASession extends StandardSession
         super.setId(id);
 
         // Set the jreplica value for the first request here when the session is created - after that it is done in the valve
-        ReplicationManagerBase manager = (ReplicationManagerBase)(getManager());
+        ReplicationManagerBase manager = (ReplicationManagerBase) (getManager());
         String jReplicaValue = manager.getReplicaFromPredictor(id, null);
         if (jReplicaValue != null) {
             setNote(Globals.JREPLICA_SESSION_NOTE, jReplicaValue);
@@ -172,7 +173,7 @@ public abstract class BaseHASession extends StandardSession
 
         HttpSessionBindingEvent event = null;
         event = new HttpSessionBindingEvent
-                ((HttpSession) this, null, null);
+            ((HttpSession) this, null, null);
 
         // Notify special event listeners on sync()
         Manager manager = this.getManager();
@@ -189,9 +190,8 @@ public abstract class BaseHASession extends StandardSession
      * is not restored by this method, and must be set explicitly.
      *
      * @param stream The input stream to read from
-     *
-     * @exception ClassNotFoundException if an unknown class is specified
-     * @exception IOException if an input/output error occurs
+     * @throws ClassNotFoundException if an unknown class is specified
+     * @throws IOException            if an input/output error occurs
      */
     private void readObject(ObjectInputStream stream)
         throws ClassNotFoundException, IOException {
@@ -216,8 +216,7 @@ public abstract class BaseHASession extends StandardSession
      * associated Manager is set to <code>true</code>.
      *
      * @param stream The output stream to write to
-     *
-     * @exception IOException if an input/output error occurs
+     * @throws IOException if an input/output error occurs
      */
     private void writeObject(ObjectOutputStream stream) throws IOException {
 
@@ -240,7 +239,7 @@ public abstract class BaseHASession extends StandardSession
 
         if (getIsValid()) {
             final Enumeration<String> attrNamesEnum = getAttributeNamesInternal();
-            while(attrNamesEnum.hasMoreElements()) {
+            while (attrNamesEnum.hasMoreElements()) {
                 final String nextAttrName = attrNamesEnum.nextElement();
                 final Object nextAttrValue = getAttributeInternal(nextAttrName);
                 sb.append("\n");
