@@ -51,20 +51,20 @@ import java.io.Serializable;
 import org.apache.catalina.Manager;
 
 /**
- *
- * @author  lwhite
- * @author  Rajiv Mordani
+ * @author lwhite
+ * @author Rajiv Mordani
  */
 public class FullHASession extends BaseHASession {
-    
+
     /**
      * Creates a new instance of FullHASession
-     * @param manager 
+     *
+     * @param manager to use
      */
     public FullHASession(Manager manager) {
         super(manager);
     }
-    
+
     /**
      * always return true for isDirty()
      * this type of session is always dirty
@@ -73,14 +73,17 @@ public class FullHASession extends BaseHASession {
         return true;
     }
 
-    /** 
+    /**
      * this is deliberately a no-op
      * store framework calls this method
      * so it must be there but must not have
      * any effect
-     * @param isDirty
-     */ 
-    public void setDirty(boolean isDirty) {
+     *
+     * @param value is ignored
+     */
+    @Override
+    public void setDirty(final boolean value) {
+
     }
     
     public void removeAttribute(String name) {
@@ -96,5 +99,5 @@ public class FullHASession extends BaseHASession {
     public Object getAttribute(String name) {
         setDirty(true);
         return super.getAttribute(name);
-    }                
+    }
 }
