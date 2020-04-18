@@ -41,20 +41,12 @@
 package org.glassfish.web.ha.session.management;
 
 
-public interface ReplicationAttributeNames {
+public final class ReplicationAttributeNames {
 
     public static final String EXTRA_PARAM = "extraParam";
-
     public static final String STATE = "state";
 
-    public static final String VERSION = "version";
-
-    public static final String OWNER_ID = "ownerId";
-
-    public static final String MAX_INACTIVE_INTERVAL = "maxInactiveInterval";
-
-    public static final String LAST_ACCESS_TIME = "lastAccessTime";
-
-    public static final String SESSION_ATTRIBUTES="sessionAttributes";
-
+    private ReplicationAttributeNames() {
+        // constant class
+    }
 }
