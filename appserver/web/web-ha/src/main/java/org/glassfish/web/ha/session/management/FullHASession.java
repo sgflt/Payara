@@ -59,7 +59,7 @@ public class FullHASession extends BaseHASession {
      *
      * @param manager to use
      */
-    public FullHASession(Manager manager) {
+    public FullHASession(final Manager manager) {
         super(manager);
     }
 
@@ -86,19 +86,19 @@ public class FullHASession extends BaseHASession {
     }
 
     @Override
-    public void removeAttribute(String name) {
+    public void removeAttribute(final String name) {
         super.removeAttribute(name);
         setDirty(true);
     }
 
     @Override
-    public void setAttribute(String name, Object value) {
+    public void setAttribute(final String name, final Object value) {
         super.setAttribute(name, value);
         setDirty(true);
     }
 
     @Override
-    public Object getAttribute(String name) {
+    public Object getAttribute(final String name) {
         setDirty(true);
         return super.getAttribute(name);
     }
