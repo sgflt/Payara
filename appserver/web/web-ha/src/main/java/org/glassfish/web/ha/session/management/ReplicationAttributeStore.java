@@ -475,29 +475,20 @@ public class ReplicationAttributeStore extends ReplicationStore {
      *
      * @param attributeValue The attribute value we are serializing
      */
-    protected byte[] getByteArray(final Object attributeValue)
-        throws IOException {
-        ByteArrayOutputStream bos = null;
+    protected byte[] getByteArray(final Object attributeValue) throws IOException {
         ObjectOutputStream oos = null;
 
-
-        byte[] obs;
-        try {
-            bos = new ByteArrayOutputStream();
-
-
+        final byte[] obs;
+        try (final ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             try {
                 oos = this.ioUtils.createObjectOutputStream(new BufferedOutputStream(bos), true);
-            } catch (final Exception ex) {
-            }
-
-            //use normal ObjectOutputStream if there is a failure during stream creation
-            if (oos == null) {
+            } catch (final Exception e) {
+                //use normal ObjectOutputStream if there is a failure during stream creation
                 oos = new ObjectOutputStream(new BufferedOutputStream(bos));
             }
+
             oos.writeObject(attributeValue);
             oos.close();
-            oos = null;
 
             obs = bos.toByteArray();
         } finally {
