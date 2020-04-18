@@ -52,7 +52,6 @@ import org.apache.catalina.Manager;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.session.StandardSession;
 
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -148,10 +147,7 @@ public abstract class BaseHASession extends StandardSession
 
     @Override
     public void sync() {
-
-        HttpSessionBindingEvent event = null;
-        event = new HttpSessionBindingEvent
-            ((HttpSession) this, null, null);
+        final HttpSessionBindingEvent event = new HttpSessionBindingEvent(this, null, null);
 
         // Notify special event listeners on sync()
         final Manager manager = this.getManager();
