@@ -47,17 +47,18 @@
 
 package org.glassfish.web.ha.session.management;
 
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionBindingEvent;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.security.Principal;
-import java.util.Enumeration;
 import org.apache.catalina.Globals;
 import org.apache.catalina.Manager;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.session.StandardSession;
+
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionBindingEvent;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.security.Principal;
+import java.util.Enumeration;
 
 /**
  *
@@ -91,13 +92,6 @@ public abstract class BaseHASession extends StandardSession
         }
 
     }
-
-
-    /**
-     * always return true for isDirty()
-     * this type of session is always dirty
-     */
-    public abstract boolean isDirty();
 
     /**
      * this is deliberately a no-op
