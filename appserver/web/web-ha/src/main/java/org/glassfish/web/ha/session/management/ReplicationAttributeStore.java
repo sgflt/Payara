@@ -292,10 +292,8 @@ public class ReplicationAttributeStore extends ReplicationStore {
             bis = new BufferedInputStream(bais);
 
             //Get the username, ssoId from metadata
-            //ssoId = metadata.getSsoId();
             ssoId = metadata.getStringExtraParam();
             version = metadata.getVersion();
-            //debug("ReplicationStore.getSession()  id="+id+"  username ="+username+";");    
 
             if (_logger.isLoggable(Level.FINEST)) {
                 _logger.finest("loaded session from replicationstore, length = " + state.length);
@@ -357,12 +355,8 @@ public class ReplicationAttributeStore extends ReplicationStore {
         _session.setNew(false);
         if (_logger.isLoggable(Level.FINE)) {
             _logger.fine("ReplicationAttributeStore>>ssoId=" + ssoId);
-        }        
-/*
-        ((BaseHASession)_session).setSsoId(ssoId);
-        if((ssoId !=null) && (!ssoId.equals("")))
-            associate(ssoId, _session);
-*/
+        }
+
         ((HASession) _session).setVersion(version);
         ((HASession) _session).setDirty(false);
 
@@ -719,7 +713,6 @@ public class ReplicationAttributeStore extends ReplicationStore {
         }
 
         String thisAttrName = null;
-        //SessionAttributeMetadata.Operation thisAttrOp = null;
         Object thisAttrVal = null;
         final Iterator it = attributeList.iterator();
         while (it.hasNext()) {
@@ -747,28 +740,7 @@ public class ReplicationAttributeStore extends ReplicationStore {
                 modifiedAttributeSession.setAttributeStateDirty(thisAttrName, false);
             } //end if
         } //end while 
-    } 
-    
-
-
-/*
-    private byte[] serializeStatesCollection(Collection entries) {
-        byte[] result = null;
-        try {
-            result = getByteArrayFromCollection(entries);
-        } catch (IOException ex) {} 
-        return result;
     }
-    
-    private byte[] serializeStatesCollectionPrevious(Collection entries) {
-        byte[] result = null;
-        try {
-            result = getByteArray(entries);
-        } catch (IOException ex) {} 
-        return result;
-    }    
-*/
-
 
     private Collection deserializeStatesCollection(final byte[] entriesState) {
         Collection result = new ArrayList();
@@ -779,18 +751,5 @@ public class ReplicationAttributeStore extends ReplicationStore {
         } catch (final IOException ex2) {
         }
         return result;
-    } 
-    
-/*
-    private Collection deserializeStatesCollectionPrevious(byte[] entriesState) {
-        Collection result = new ArrayList();
-        try {
-            result = (Collection)getAttributeValue(entriesState);
-        } catch (ClassNotFoundException ex1) {
-              // FIXME log?
-        } catch (IOException ex2) {}        
-        return result;
-    }     
-*/
-
+    }
 }
