@@ -43,8 +43,7 @@ package org.glassfish.web.ha.session.management;
 import org.apache.catalina.Manager;
 
 /**
- *
- * @author  lwhite
+ * @author lwhite
  * @author Rajiv Mordani
  */
 public class ModifiedHASession extends BaseHASession {
@@ -52,7 +51,9 @@ public class ModifiedHASession extends BaseHASession {
     private transient boolean dirtyFlag = false;
 
 
-    /** Creates a new instance of ModifiedHASession */
+    /**
+     * Creates a new instance of ModifiedHASession
+     */
     public ModifiedHASession(Manager manager) {
         super(manager);
     }
@@ -60,10 +61,12 @@ public class ModifiedHASession extends BaseHASession {
     /**
      * set the attribute name to the value value
      * and update the dirty flag to true
-     * @param name
-     * @param value
-     */     
-    public void setAttribute(String name, Object value) { 
+     *
+     * @param name  of attribute
+     * @param value to set
+     */
+    @Override
+    public void setAttribute(String name, Object value) {
         super.setAttribute(name, value);
         this.setDirty(true);
     }
@@ -71,26 +74,22 @@ public class ModifiedHASession extends BaseHASession {
     /**
      * remove the attribute name
      * and update the dirty flag to true
-     * @param name
-     */     
+     *
+     * @param name of attribute
+     */
+    @Override
     public void removeAttribute(String name) {
         super.removeAttribute(name);
         this.setDirty(true);
     }
 
-    /**
-     * return isDirty
-     */     
+    @Override
     public boolean isDirty() {
         return dirtyFlag;
     }
-    
-    /**
-     * set isDirty
-     * @param isDirty
-     */      
+
+    @Override
     public void setDirty(boolean isDirty) {
         dirtyFlag = isDirty;
     }
-
 }
