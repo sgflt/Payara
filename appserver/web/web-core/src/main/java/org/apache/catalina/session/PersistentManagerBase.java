@@ -257,28 +257,15 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
      * Perform the background processes for this Manager
      */
     public void backgroundProcess() {
-        this.processExpires();
-        this.processPersistenceChecks();
+        processExpires();
+        processPersistenceChecks();
         // START SJSAS 6406580
-        this.processInvalidatedSessions();
+        processInvalidatedSessions();
         // END SJSAS 6406580
-        if ((this.getStore() != null)
-            && (this.getStore() instanceof StoreBase)) {
+        if (getStore() instanceof StoreBase) {
             ((StoreBase) this.getStore()).processExpires();
         }
     }
-
-    /**
-     * Indicates how many seconds old a session can get, after its last
-     * use in a request, before it should be backed up to the store. -1
-     * means sessions are not backed up.
-     */
-    public int getMaxIdleBackup() {
-
-        return this.maxIdleBackup;
-
-    }
-
 
     /**
      * Sets the option to back sessions up to the Store after they
@@ -315,17 +302,6 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
 
 
     /**
-     * The time in seconds after which a session should be swapped out of
-     * memory to disk.
-     */
-    public int getMaxIdleSwap() {
-
-        return this.maxIdleSwap;
-
-    }
-
-
-    /**
      * Sets the time in seconds after which a session should be swapped out of
      * memory to disk.
      */
@@ -339,18 +315,6 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
         this.support.firePropertyChange("maxIdleSwap",
             Integer.valueOf(oldMaxIdleSwap),
             Integer.valueOf(this.maxIdleSwap));
-
-    }
-
-
-    /**
-     * The minimum time in seconds that a session must be idle before
-     * it can be swapped out of memory, or -1 if it can be swapped out
-     * at any time.
-     */
-    public int getMinIdleSwap() {
-
-        return this.minIdleSwap;
 
     }
 
@@ -432,19 +396,16 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
      * otherwise false is returned
      *
      * @param id The session id for the session to be searched for
-     * @throws IOException if an input/output error occurs while
-     *                     processing this request
      */
     public boolean isLoaded(final String id) {
         try {
-            if (super.findSession(id) != null) {
-                return true;
-            }
+            return super.findSession(id) != null;
         } catch (final IOException e) {
             final String msg = MessageFormat.format(rb.getString(LogFacade.CHECKING_IS_LOADED_EXCEPTION),
                 id, e.getMessage());
             log.log(Level.SEVERE, msg, e);
         }
+
         return false;
     }
 
@@ -454,9 +415,7 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
      * no limit.
      */
     public int getMaxActiveSessions() {
-
         return (this.maxActiveSessions);
-
     }
 
 
@@ -1286,7 +1245,7 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
             }
         }
 
-        if (getStore() != null && getStore() instanceof Lifecycle) {
+        if (getStore() instanceof Lifecycle) {
             ((Lifecycle) getStore()).stop();
         }
 
