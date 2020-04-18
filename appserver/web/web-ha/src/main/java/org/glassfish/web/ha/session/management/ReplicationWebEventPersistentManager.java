@@ -59,26 +59,24 @@ import org.glassfish.ha.store.api.BackingStoreConfiguration;
 import org.glassfish.ha.store.api.BackingStoreException;
 import org.glassfish.ha.store.api.BackingStoreFactory;
 import org.glassfish.ha.store.api.Storeable;
-import org.glassfish.web.ha.LogFacade;
-import javax.inject.Inject;
-
-import org.jvnet.hk2.annotations.Service;
-import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.api.PerLookup;
+import org.glassfish.hk2.api.ServiceLocator;
+import org.glassfish.web.ha.LogFacade;
+import org.jvnet.hk2.annotations.Service;
 
+import javax.inject.Inject;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.util.Map;
 import java.util.logging.Level;
 
 /**
- *
  * @author Rajiv Mordani
  */
 @Service
 @PerLookup
 public class ReplicationWebEventPersistentManager<T extends Storeable> extends ReplicationManagerBase<T>
-        implements WebEventPersistentManager {
+    implements WebEventPersistentManager {
 
     @Inject
     private ServiceLocator services;
@@ -93,13 +91,13 @@ public class ReplicationWebEventPersistentManager<T extends Storeable> extends R
     /**
      * The descriptive information about this implementation.
      */
-    private static final String info = "ReplicationWebEventPersistentManager/1.0";
+    private final String info = "ReplicationWebEventPersistentManager/1.0";
 
 
     /**
      * The descriptive name of this Manager implementation (for logging).
      */
-    private static final String name = "ReplicationWebEventPersistentManager";    
+    private final String name = "ReplicationWebEventPersistentManager";
 
 
     // ------------------------------------------------------------- Properties
@@ -110,104 +108,89 @@ public class ReplicationWebEventPersistentManager<T extends Storeable> extends R
      * the corresponding version number, in the format
      * <code>&lt;description&gt;/&lt;version&gt;</code>.
      */
+    @Override
     public String getInfo() {
-
-        return (this.info);
-
+        return this.info;
     }
-    
-    /** Creates a new instance of ReplicationWebEventPersistentManager */
+
+    /**
+     * Creates a new instance of ReplicationWebEventPersistentManager
+     */
     public ReplicationWebEventPersistentManager() {
-        super();
-        if (_logger.isLoggable(Level.FINE)) {
-            _logger.fine("ReplicationWebEventPersistentManager created");
+        if (this._logger.isLoggable(Level.FINE)) {
+            this._logger.fine("ReplicationWebEventPersistentManager created");
         }
     }
 
     @Override
-    public void add(Session session) {
-        if(!(session instanceof HANonStorableSession)) {
+    public void add(final Session session) {
+        if (!(session instanceof HANonStorableSession)) {
             super.add(session);
         }
     }
-    
+
     /**
-    * called from valve; does the save of session
-    *
-    * @param session 
-    *   The session to store
-    */    
-    public void doValveSave(Session session) {
-        if(session instanceof HANonStorableSession) {
+     * called from valve; does the save of session
+     *
+     * @param session The session to store
+     */
+    @Override
+    public void doValveSave(final Session session) {
+        if (session instanceof HANonStorableSession) {
             return;
         }
-        if (_logger.isLoggable(Level.FINE)) {
-            _logger.fine("in doValveSave");
+        if (this._logger.isLoggable(Level.FINE)) {
+            this._logger.fine("in doValveSave");
         }
 
-            try {
-                ReplicationStore replicationStore = (ReplicationStore) this.getStore();
-                replicationStore.doValveSave(session);
-                if (_logger.isLoggable(Level.FINE)) {
-                    _logger.fine("FINISHED repStore.valveSave");
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-
-                _logger.log(Level.FINE, "exception occurred in doValveSave id=" + session.getIdInternal(),
-                                ex);
-                
+        try {
+            final ReplicationStore replicationStore = (ReplicationStore) this.getStore();
+            replicationStore.doValveSave(session);
+            if (this._logger.isLoggable(Level.FINE)) {
+                this._logger.fine("FINISHED repStore.valveSave");
             }
+        } catch (final Exception ex) {
+            this._logger.log(Level.FINE, "exception occurred in doValveSave id=" + session.getIdInternal(),
+                ex);
+
+        }
     }
-   
+
 
     //START OF 6364900
-    public void postRequestDispatcherProcess(ServletRequest request, ServletResponse response) {
-        Session sess = this.getSession(request);
-        
-        if(sess != null) {         
-            doValveSave(sess);            
+    @Override
+    public void postRequestDispatcherProcess(final ServletRequest request, final ServletResponse response) {
+        final Session sess = this.getSession(request);
+
+        if (sess != null) {
+            doValveSave(sess);
         }
-        return;
     }
-    
-    private Session getSession(ServletRequest request) {
-        javax.servlet.http.HttpServletRequest httpReq =
+
+    private Session getSession(final ServletRequest request) {
+        final javax.servlet.http.HttpServletRequest httpReq =
             (javax.servlet.http.HttpServletRequest) request;
-        javax.servlet.http.HttpSession httpSess = httpReq.getSession(false);
-        if(httpSess == null) {
+        final javax.servlet.http.HttpSession httpSess = httpReq.getSession(false);
+        if (httpSess == null) {
             return null;
         }
-        String id = httpSess.getId();
+        final String id = httpSess.getId();
         Session sess = null;
         try {
             sess = this.findSession(id);
-        } catch (java.io.IOException ex) {}
+        } catch (final java.io.IOException ex) {
+        }
 
         return sess;
-    } 
+    }
     //END OF 6364900 
-    
-    //new code start    
-    
-
-    //private static int NUMBER_OF_REQUESTS_BEFORE_FLUSH = 1000;
-    //volatile Map<String, String> removedKeysMap = new ConcurrentHashMap<String, String>();
-    //private static AtomicInteger requestCounter = new AtomicInteger(0);
-    private static int _messageIDCounter = 0;
-    //private AtomicBoolean  timeToChange = new AtomicBoolean(false);
-    
-
-    // ------------------------------------------------------------- Properties
-
 
     /**
      * Return the descriptive short name of this Manager implementation.
      */
+    @Override
     public String getName() {
-
         return this.name;
-
     }
 
     /**
@@ -215,83 +198,84 @@ public class ReplicationWebEventPersistentManager<T extends Storeable> extends R
      * Hercules: modified method we do not want
      * background saves when we are using web-event persistence-frequency
      */
+    @Override
     protected void processMaxIdleBackups() {
         //this is a deliberate no-op for this manager
-        return;
     }
-    
+
     /**
      * Swap idle sessions out to Store if too many are active
      * Hercules: modified method
      */
+    @Override
     protected void processMaxActiveSwaps() {
         //this is a deliberate no-op for this manager
-        return;
     }
 
     /**
      * Swap idle sessions out to Store if they are idle too long.
      */
+    @Override
     protected void processMaxIdleSwaps() {
         //this is a deliberate no-op for this manager
-        return;
     }
 
-    public String getReplicaFromPredictor(String sessionId, String oldJreplicaValue) {
+    @Override
+    public String getReplicaFromPredictor(final String sessionId, final String oldJreplicaValue) {
         if (isDisableJreplica()) {
             return null;
         }
         String gmsClusterName = "";
-        HazelcastCore hazelcast = services.getService(HazelcastCore.class);
+        final HazelcastCore hazelcast = this.services.getService(HazelcastCore.class);
         if (hazelcast.isEnabled()) {
             gmsClusterName = hazelcast.getMemberGroup();
         }
-        HACookieInfo cookieInfo = predictor.makeCookie(gmsClusterName, sessionId, oldJreplicaValue);
+        final HACookieInfo cookieInfo = this.predictor.makeCookie(gmsClusterName, sessionId, oldJreplicaValue);
         HACookieManager.setCurrrent(cookieInfo);
         return cookieInfo.getNewReplicaCookie();
     }
 
 
     @Override
-    public void createBackingStore(String persistenceType, String storeName, Class<T> metadataClass, Map<String, Object> vendorMap) {
-        if (_logger.isLoggable(Level.FINE)) {
-            _logger.fine("Create backing store invoked with persistence type " + persistenceType + " and store name " + storeName);
+    public void createBackingStore(final String persistenceType, final String storeName, final Class<T> metadataClass, final Map<String, Object> vendorMap) {
+        if (this._logger.isLoggable(Level.FINE)) {
+            this._logger.fine("Create backing store invoked with persistence type " + persistenceType + " and store name " + storeName);
         }
-        BackingStoreFactory factory = services.getService(BackingStoreFactory.class, persistenceType);
-        BackingStoreConfiguration<String, T> conf = new BackingStoreConfiguration<String, T>();
+        final BackingStoreFactory factory = this.services.getService(BackingStoreFactory.class, persistenceType);
+        final BackingStoreConfiguration<String, T> conf = new BackingStoreConfiguration<>();
 
-        HazelcastCore hazelcast = services.getService(HazelcastCore.class);
+        final HazelcastCore hazelcast = this.services.getService(HazelcastCore.class);
         if (hazelcast.isEnabled()) {
-            clusterName = hazelcast.getMemberGroup();
-            instanceName = hazelcast.getMemberName();
+            this.clusterName = hazelcast.getMemberGroup();
+            this.instanceName = hazelcast.getMemberName();
         }
-        
+
         conf.setStoreName(storeName)
-                .setClusterName(clusterName)
-                .setInstanceName(instanceName)
-                .setStoreType(persistenceType)
-                .setKeyClazz(String.class).setValueClazz(metadataClass)
-                .setClassLoader(this.getClass().getClassLoader());
+            .setClusterName(this.clusterName)
+            .setInstanceName(this.instanceName)
+            .setStoreType(persistenceType)
+            .setKeyClazz(String.class).setValueClazz(metadataClass)
+            .setClassLoader(this.getClass().getClassLoader());
         if (vendorMap != null) {
             conf.getVendorSpecificSettings().putAll(vendorMap);
         }
 
         try {
-            if (_logger.isLoggable(Level.FINE)) {
-                _logger.fine("About to create backing store " + conf);
+            if (this._logger.isLoggable(Level.FINE)) {
+                this._logger.fine("About to create backing store " + conf);
             }
             this.backingStore = factory.createBackingStore(conf);
-        } catch (BackingStoreException e) {
-            _logger.log(Level.WARNING, LogFacade.COULD_NOT_CREATE_BACKING_STORE, e);
+        } catch (final BackingStoreException e) {
+            this._logger.log(Level.WARNING, LogFacade.COULD_NOT_CREATE_BACKING_STORE, e);
         }
-        Object obj = conf.getVendorSpecificSettings().get("key.mapper");
-        if (obj != null && obj instanceof GlassFishHAReplicaPredictor) {
-            predictor = (GlassFishHAReplicaPredictor)obj;
-            if (_logger.isLoggable(Level.FINE)) {
-                _logger.fine("ReplicatedManager.keymapper is " + predictor);
+        final Object obj = conf.getVendorSpecificSettings().get("key.mapper");
+        if (obj instanceof GlassFishHAReplicaPredictor) {
+            this.predictor = (GlassFishHAReplicaPredictor) obj;
+            if (this._logger.isLoggable(Level.FINE)) {
+                this._logger.fine("ReplicatedManager.keymapper is " + this.predictor);
             }
         } else {
-            predictor = new NoopHAReplicaPredictor();
+            this.predictor = new NoopHAReplicaPredictor();
         }
     }
 }
