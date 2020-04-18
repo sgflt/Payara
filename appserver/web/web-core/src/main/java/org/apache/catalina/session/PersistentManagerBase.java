@@ -1030,13 +1030,7 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
 
         if (!session.isValid()) {
             log.log(this.store.getManager().getDistributable() ? Level.FINE : Level.SEVERE, LogFacade.INVALID_EXPIRED_SESSION_EXCEPTION);
-            //6406580 START
-            /* - these lines are calling remove on store redundantly
-            session.expire();
-            removeSession(id);
-             */
-            //6406580 END            
-            return (null);
+            return null;
         }
 
         if (log.isLoggable(Level.FINE)) {
