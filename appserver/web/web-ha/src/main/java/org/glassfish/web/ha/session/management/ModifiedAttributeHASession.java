@@ -62,7 +62,7 @@ import java.util.logging.Logger;
  * @author lwhite
  * @author Rajiv Mordani
  */
-public class ModifiedAttributeHASession extends BaseHASession {
+class ModifiedAttributeHASession extends BaseHASession {
 
     private static final Logger logger = HAStoreBase._logger;
 
@@ -73,7 +73,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
     /**
      * Creates a new instance of ModifiedAttributeHASession
      */
-    public ModifiedAttributeHASession(Manager manager) {
+    ModifiedAttributeHASession(Manager manager) {
         super(manager);
     }
 
@@ -81,7 +81,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
      * return an ArrayList of Strings
      * whose elements are the names of the deleted attributes
      */
-    public List<String> getDeletedAttributes() {
+    List<String> getDeletedAttributes() {
 
         List<String> resultList = new ArrayList<>();
         for (Map.Entry<String, SessionAttributeState> entry : this.attributeStates.entrySet()) {
@@ -99,7 +99,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
      * whose elements are the names of the modified attributes
      * attributes must dirty, persistent and not deleted
      */
-    public List<String> getModifiedAttributes() {
+    List<String> getModifiedAttributes() {
         List<String> resultList = new ArrayList<>();
         for (Map.Entry<String, SessionAttributeState> entry : this.attributeStates.entrySet()) {
             SessionAttributeState nextAttrState = entry.getValue();
@@ -117,7 +117,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
      * return an ArrayList of Strings
      * whose elements are the names of the added attributes
      */
-    public List<String> getAddedAttributes() {
+    List<String> getAddedAttributes() {
         List<String> resultList = new ArrayList<>();
         for (Map.Entry<String, SessionAttributeState> entry : this.attributeStates.entrySet()) {
             SessionAttributeState nextAttrState = entry.getValue();
