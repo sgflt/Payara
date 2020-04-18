@@ -235,7 +235,7 @@ public class ReplicationAttributeStore extends ReplicationStore {
 
     @Override
     public Session load(final String id, final String version)
-        throws ClassNotFoundException, IOException {
+        throws IOException {
         try {
             final CompositeMetadata metaData =
                 getCompositeMetadataBackingStore().load(id, version);
@@ -247,7 +247,7 @@ public class ReplicationAttributeStore extends ReplicationStore {
             return session;
         } catch (final BackingStoreException ex) {
             final IOException ex1 =
-                (IOException) new IOException("Error during load: " + ex.getMessage(), ex);
+                new IOException("Error during load: " + ex.getMessage(), ex);
             throw ex1;
         }
     }
@@ -332,12 +332,9 @@ public class ReplicationAttributeStore extends ReplicationStore {
                 }
             }
         } catch (final ClassNotFoundException e) {
-            final IOException ex1 = (IOException) new IOException(
-                "Error during deserialization: " + e.getMessage(), e);
-            throw ex1;
-        } catch (final IOException e) {
-            throw e;
+            throw new IOException("Error during deserialization: " + e.getMessage(), e);
         }
+
         final String username = ((HASession) _session).getUserName();
         if ((username != null) && (!username.equals("")) && _session.getPrincipal() == null) {
             if (this._debug > 0) {
