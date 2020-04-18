@@ -412,9 +412,8 @@ public class ReplicationAttributeStore extends ReplicationStore {
     private void printAttrList(final String attrListType, final List<String> attrList) {
         if (_logger.isLoggable(Level.FINE)) {
             _logger.fine("AttributeType = " + attrListType);
-            String nextAttrName = null;
             for (int i = 0; i < attrList.size(); i++) {
-                nextAttrName = attrList.get(i);
+                final String nextAttrName = attrList.get(i);
                 _logger.fine("attribute[" + i + "]=" + nextAttrName);
             }
         }
