@@ -60,8 +60,7 @@ import java.util.logging.Logger;
 
 
 /**
- *
- * @author  lwhite
+ * @author lwhite
  * @author Rajiv Mordani
  */
 public class ModifiedAttributeHASession extends BaseHASession {
@@ -72,7 +71,9 @@ public class ModifiedAttributeHASession extends BaseHASession {
     private transient boolean dirtyFlag = false;
 
 
-    /** Creates a new instance of ModifiedAttributeHASession */
+    /**
+     * Creates a new instance of ModifiedAttributeHASession
+     */
     public ModifiedAttributeHASession(Manager manager) {
         super(manager);
     }
@@ -87,7 +88,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
         for (Map.Entry<String, SessionAttributeState> entry : this.attributeStates.entrySet()) {
             SessionAttributeState nextAttrState = entry.getValue();
             String nextAttrName = entry.getKey();
-            if(nextAttrState.isDeleted() && nextAttrState.isPersistent()) {
+            if (nextAttrState.isDeleted() && nextAttrState.isPersistent()) {
                 resultList.add(nextAttrName);
             }
         }
@@ -104,9 +105,9 @@ public class ModifiedAttributeHASession extends BaseHASession {
         for (Map.Entry<String, SessionAttributeState> entry : this.attributeStates.entrySet()) {
             SessionAttributeState nextAttrState = entry.getValue();
             String nextAttrName = entry.getKey();
-            if(nextAttrState.isDirty()
-                    && nextAttrState.isPersistent()
-                    && (!nextAttrState.isDeleted())) {
+            if (nextAttrState.isDirty()
+                && nextAttrState.isPersistent()
+                && (!nextAttrState.isDeleted())) {
                 resultList.add(nextAttrName);
             }
         }
@@ -122,7 +123,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
         for (Map.Entry<String, SessionAttributeState> entry : this.attributeStates.entrySet()) {
             SessionAttributeState nextAttrState = entry.getValue();
             String nextAttrName = entry.getKey();
-            if(!nextAttrState.isPersistent() && !nextAttrState.isDirty()) {
+            if (!nextAttrState.isPersistent() && !nextAttrState.isDirty()) {
                 resultList.add(nextAttrName);
             }
         }
@@ -138,7 +139,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
         for (Map.Entry<String, SessionAttributeState> entry : this.attributeStates.entrySet()) {
             SessionAttributeState nextAttrState = entry.getValue();
             String nextAttrName = entry.getKey();
-            if(!nextAttrState.isPersistent()) {
+            if (!nextAttrState.isPersistent()) {
                 resultList.add(nextAttrName);
             }
         }
@@ -149,7 +150,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
      * clear (empty) the attributeStates
      */
     void clearAttributeStates() {
-        if(this.attributeStates == null) {
+        if (this.attributeStates == null) {
             this.attributeStates = new ConcurrentHashMap<>();
         }
         this.attributeStates.clear();
@@ -170,7 +171,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
     void resetAttributeState() {
         clearAttributeStates();
         Enumeration<String> attrNames = getAttributeNames();
-        while(attrNames.hasMoreElements()) {
+        while (attrNames.hasMoreElements()) {
             String nextAttrName = attrNames.nextElement();
             SessionAttributeState nextAttrState =
                 SessionAttributeState.createPersistentAttribute();
@@ -182,6 +183,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
     /**
      * set the attribute name to the value value
      * and update the attribute state accordingly
+     *
      * @param name
      * @param value
      */
@@ -191,16 +193,16 @@ public class ModifiedAttributeHASession extends BaseHASession {
         if (logger.isLoggable(Level.FINE)) {
             logger.fine("ModifiedAttributeHASession>>setAttribute name=" + name + " attributeState=" + attributeState);
         }
-        if(value == null) {
-            if(attributeState != null) {
-                if(attributeState.isPersistent()) {
+        if (value == null) {
+            if (attributeState != null) {
+                if (attributeState.isPersistent()) {
                     attributeState.setDeleted(true);
                 } else {
                     removeAttributeState(name);
                 }
             }
         } else {
-            if(attributeState == null) {
+            if (attributeState == null) {
                 SessionAttributeState newAttrState =
                     new SessionAttributeState();
                 //deliberately we do no make this newly added attribute dirty
@@ -208,12 +210,12 @@ public class ModifiedAttributeHASession extends BaseHASession {
             } else {
                 //if marked for deletion, only un-delete it
                 //do not change the dirti-ness
-                if(attributeState.isDeleted()) {
+                if (attributeState.isDeleted()) {
                     attributeState.setDeleted(false);
                 } else {
                     //only mark dirty if already persistent
                     //else do nothing
-                    if(attributeState.isPersistent()) {
+                    if (attributeState.isPersistent()) {
                         attributeState.setDirty(true);
                     }
                 }
@@ -225,6 +227,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
     /**
      * remove the attribute name
      * and update the attribute state accordingly
+     *
      * @param name
      */
     public void removeAttribute(String name) {
@@ -232,8 +235,8 @@ public class ModifiedAttributeHASession extends BaseHASession {
 
         super.removeAttribute(name);
         SessionAttributeState attributeState = getAttributeState(name);
-        if(attributeState != null) {
-            if(attributeState.isPersistent()) {
+        if (attributeState != null) {
+            if (attributeState.isPersistent()) {
                 attributeState.setDeleted(true);
             } else {
                 removeAttributeState(name);
@@ -244,6 +247,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
 
     /**
      * return the SessionAttributeState for attributeName
+     *
      * @param attributeName
      */
     SessionAttributeState getAttributeState(String attributeName) {
@@ -253,6 +257,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
     /**
      * set the SessionAttributeState for attributeName
      * based on persistent value
+     *
      * @param attributeName
      * @param persistent
      */
@@ -260,17 +265,18 @@ public class ModifiedAttributeHASession extends BaseHASession {
 
         SessionAttributeState attrState = this.attributeStates.get(attributeName);
         if (attrState == null) {
-                attrState = new SessionAttributeState();
-                attrState.setPersistent(persistent);
-                attributeStates.put(attributeName, attrState);
+            attrState = new SessionAttributeState();
+            attrState.setPersistent(persistent);
+            attributeStates.put(attributeName, attrState);
         } else {
-                attrState.setPersistent(persistent);
+            attrState.setPersistent(persistent);
         }
     }
 
     /**
      * set the SessionAttributeState for attributeName
      * based on dirty value
+     *
      * @param attributeName
      * @param dirty
      */
@@ -278,16 +284,17 @@ public class ModifiedAttributeHASession extends BaseHASession {
 
         SessionAttributeState attrState = this.attributeStates.get(attributeName);
         if (attrState == null) {
-                attrState = new SessionAttributeState();
-                attrState.setDirty(dirty);
+            attrState = new SessionAttributeState();
+            attrState.setDirty(dirty);
             this.attributeStates.put(attributeName, attrState);
         } else {
-                attrState.setDirty(dirty);
+            attrState.setDirty(dirty);
         }
     }
 
     /**
      * remove the SessionAttributeState for attributeName
+     *
      * @param attributeName
      */
     void removeAttributeState(String attributeName) {
@@ -303,6 +310,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
 
     /**
      * set isDirty
+     *
      * @param isDirty
      */
     public void setDirty(boolean isDirty) {
