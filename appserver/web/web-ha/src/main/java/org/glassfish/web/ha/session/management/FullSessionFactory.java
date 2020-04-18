@@ -54,10 +54,6 @@ import org.apache.catalina.Session;
  * @author  lwhite
  */
 public class FullSessionFactory implements SessionFactory {
-    
-    /** Creates a new instance of FullSessionFactory */
-    public FullSessionFactory() {
-    }
 
     /** 
      * create a new session 
@@ -66,5 +62,4 @@ public class FullSessionFactory implements SessionFactory {
     public Session createSession(Manager mgr) {
         return new FullHASession(mgr);
     }
-    
 }
