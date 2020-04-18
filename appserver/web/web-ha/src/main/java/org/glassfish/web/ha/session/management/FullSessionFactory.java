@@ -50,16 +50,17 @@ import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 
 /**
- *
- * @author  lwhite
+ * @author lwhite
  */
 public class FullSessionFactory implements SessionFactory {
 
-    /** 
-     * create a new session 
-     * @param mgr                                                                                                         
-     */    
-    public Session createSession(Manager mgr) {
+    /**
+     * create a new session
+     *
+     * @param mgr to use
+     */
+    @Override
+    public Session createSession(final Manager mgr) {
         return new FullHASession(mgr);
     }
 }
