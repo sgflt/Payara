@@ -52,14 +52,14 @@ import org.apache.catalina.Manager;
  * @author lwhite
  * @author Rajiv Mordani
  */
-public class FullHASession extends BaseHASession {
+class FullHASession extends BaseHASession {
 
     /**
      * Creates a new instance of FullHASession
      *
      * @param manager to use
      */
-    public FullHASession(final Manager manager) {
+    FullHASession(final Manager manager) {
         super(manager);
     }
 
