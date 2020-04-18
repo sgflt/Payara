@@ -83,7 +83,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
      */
     public List<String> getDeletedAttributes() {
 
-        List<String> resultList = new ArrayList<String>();
+        List<String> resultList = new ArrayList<>();
         for (Map.Entry<String, SessionAttributeState> entry : this.attributeStates.entrySet()) {
             SessionAttributeState nextAttrState = entry.getValue();
             String nextAttrName = entry.getKey();
@@ -100,7 +100,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
      * attributes must dirty, persistent and not deleted
      */
     public List<String> getModifiedAttributes() {
-        List<String> resultList = new ArrayList<String>();
+        List<String> resultList = new ArrayList<>();
         for (Map.Entry<String, SessionAttributeState> entry : this.attributeStates.entrySet()) {
             SessionAttributeState nextAttrState = entry.getValue();
             String nextAttrName = entry.getKey();
@@ -118,7 +118,7 @@ public class ModifiedAttributeHASession extends BaseHASession {
      * whose elements are the names of the added attributes
      */
     public List<String> getAddedAttributes() {
-        List<String> resultList = new ArrayList<String>();
+        List<String> resultList = new ArrayList<>();
         for (Map.Entry<String, SessionAttributeState> entry : this.attributeStates.entrySet()) {
             SessionAttributeState nextAttrState = entry.getValue();
             String nextAttrName = entry.getKey();
