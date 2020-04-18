@@ -48,7 +48,6 @@
 package org.glassfish.web.ha.session.management;
 
 import org.apache.catalina.Manager;
-import org.apache.catalina.util.Enumerator;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -315,12 +314,5 @@ public class ModifiedAttributeHASession extends BaseHASession {
      */
     public void setDirty(boolean isDirty) {
         this.dirtyFlag = isDirty;
-    }
-
-    /* Private Helper method to be used in HAAttributeStore only */
-    Enumeration<String> privateGetAttributeList() {
-
-        return (new Enumerator<String>(new ArrayList<String>(this.attributes.keySet())));
-
     }
 }
