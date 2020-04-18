@@ -73,7 +73,7 @@ public abstract class BaseHASession extends StandardSession
     /**
      * Creates a new instance of BaseHASession
      */
-    public BaseHASession(Manager manager) {
+    public BaseHASession(final Manager manager) {
         super(manager);
     }
 
@@ -83,12 +83,12 @@ public abstract class BaseHASession extends StandardSession
      * @param id The new session identifier
      */
     @Override
-    public void setId(String id) {
+    public void setId(final String id) {
         super.setId(id);
 
         // Set the jreplica value for the first request here when the session is created - after that it is done in the valve
-        ReplicationManagerBase manager = (ReplicationManagerBase) (getManager());
-        String jReplicaValue = manager.getReplicaFromPredictor(id, null);
+        final ReplicationManagerBase manager = (ReplicationManagerBase) (getManager());
+        final String jReplicaValue = manager.getReplicaFromPredictor(id, null);
         if (jReplicaValue != null) {
             setNote(Globals.JREPLICA_SESSION_NOTE, jReplicaValue);
         }
@@ -100,15 +100,15 @@ public abstract class BaseHASession extends StandardSession
      */
     @Override
     public boolean isPersistent() {
-        return persistentFlag;
+        return this.persistentFlag;
     }
 
     /**
      * this sets the persistent flag
      */
     @Override
-    public void setPersistent(boolean value) {
-        persistentFlag = value;
+    public void setPersistent(final boolean value) {
+        this.persistentFlag = value;
     }
 
     /**
@@ -116,15 +116,15 @@ public abstract class BaseHASession extends StandardSession
      */
     @Override
     public String getUserName() {
-        return userName;
+        return this.userName;
     }
 
     /**
      * this sets the user name
      */
     @Override
-    public void setUserName(String value) {
-        userName = value;
+    public void setUserName(final String value) {
+        this.userName = value;
     }
 
     /**
@@ -133,7 +133,7 @@ public abstract class BaseHASession extends StandardSession
      * @param principal The new Principal, or <code>null</code> if none
      */
     @Override
-    public void setPrincipal(Principal principal) {
+    public void setPrincipal(final Principal principal) {
         super.setPrincipal(principal);
         this.setDirty(true);
     }
@@ -141,13 +141,13 @@ public abstract class BaseHASession extends StandardSession
     @Override
     public void recycle() {
         super.recycle();
-        userName = "";
-        ssoId = "";
-        persistentFlag = false;
+        this.userName = "";
+        this.ssoId = "";
+        this.persistentFlag = false;
     }
 
     public void save() {
-        ReplicationManagerBase manager = (ReplicationManagerBase) getManager();
+        final ReplicationManagerBase manager = (ReplicationManagerBase) getManager();
         if (manager != null) {
             manager.doValveSave(this);
         }
@@ -161,8 +161,8 @@ public abstract class BaseHASession extends StandardSession
             ((HttpSession) this, null, null);
 
         // Notify special event listeners on sync()
-        Manager manager = this.getManager();
-        StandardContext stdContext = (StandardContext) manager.getContainer();
+        final Manager manager = this.getManager();
+        final StandardContext stdContext = (StandardContext) manager.getContainer();
         // fire container event
         stdContext.fireContainerEvent("sessionSync", event);
     }
@@ -178,11 +178,11 @@ public abstract class BaseHASession extends StandardSession
      * @throws ClassNotFoundException if an unknown class is specified
      * @throws IOException            if an input/output error occurs
      */
-    private void readObject(ObjectInputStream stream)
+    private void readObject(final ObjectInputStream stream)
         throws ClassNotFoundException, IOException {
 
         // Deserialize the scalar instance variables (except Manager)
-        userName = (String) stream.readObject();
+        this.userName = (String) stream.readObject();
     }
 
     /**
@@ -203,10 +203,10 @@ public abstract class BaseHASession extends StandardSession
      * @param stream The output stream to write to
      * @throws IOException if an input/output error occurs
      */
-    private void writeObject(ObjectOutputStream stream) throws IOException {
+    private void writeObject(final ObjectOutputStream stream) throws IOException {
 
         // Write the scalar instance variables
-        stream.writeObject(userName);
+        stream.writeObject(this.userName);
     }
 
     /**
@@ -216,7 +216,7 @@ public abstract class BaseHASession extends StandardSession
 
         final StringBuilder sb = new StringBuilder(1000);
         sb.append("BaseHASession[");
-        sb.append(id);
+        sb.append(this.id);
         sb.append("]");
 
         sb.append("\n");
