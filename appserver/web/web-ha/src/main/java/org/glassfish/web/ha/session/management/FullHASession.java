@@ -84,19 +84,4 @@ class FullHASession extends BaseHASession {
     public void setDirty(final boolean value) {
 
     }
-
-    @Override
-    public void removeAttribute(final String name) {
-        super.removeAttribute(name);
-    }
-
-    @Override
-    public void setAttribute(final String name, final Object value) {
-        super.setAttribute(name, value);
-    }
-
-    @Override
-    public Object getAttribute(final String name) {
-        return super.getAttribute(name);
-    }
 }
