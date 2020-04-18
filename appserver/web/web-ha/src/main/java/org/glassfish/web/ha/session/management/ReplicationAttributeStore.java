@@ -247,7 +247,7 @@ public class ReplicationAttributeStore extends ReplicationStore {
             if (_logger.isLoggable(Level.FINE)) {
                 _logger.fine("ReplicationAttributeStore>>load:id=" + id + ", metaData=" + metaData);
             }
-            final Session session = getSession(metaData);
+            final HASession session = getSession(metaData);
             validateAndSave(session);
             return session;
         } catch (final BackingStoreException ex) {
@@ -255,31 +255,31 @@ public class ReplicationAttributeStore extends ReplicationStore {
         }
     }
 
-    private void validateAndSave(final Session session) throws IOException {
+    private void validateAndSave(final HASession session) throws IOException {
         if (session != null) {
             if (_logger.isLoggable(Level.FINE)) {
                 _logger.fine("ReplicationAttributeStore>>validateAndSave saving " +
                     "the session after loading it. Session=" + session);
             }
             //save session - save will reset dirty to false
-            ((HASession) session).setDirty(true);
+            session.setDirty(true);
             valveSave(session); // TODO :: revisit this for third party backing stores;
         }
         if (session != null) {
-            ((HASession) session).setDirty(false);
-            ((HASession) session).setPersistent(false);
+            session.setDirty(false);
+            session.setPersistent(false);
         }
     }
 
 
-    public Session getSession(final CompositeMetadata metadata)
+    public HASession getSession(final CompositeMetadata metadata)
         throws IOException {
         if (metadata == null || metadata.getState() == null) {
             return null;
         }
 
         final byte[] state = metadata.getState();
-        final Session session;
+        final HASession session;
         final String ssoId;
         final long version;
 
@@ -296,13 +296,13 @@ public class ReplicationAttributeStore extends ReplicationStore {
             }
 
             try (final ObjectInputStream ois = getObjectInputStream(bis)) {
-                session = readSession(this.manager, ois);
+                session = (HASession) readSession(this.manager, ois);
             }
         } catch (final ClassNotFoundException e) {
             throw new IOException("Error during deserialization: " + e.getMessage(), e);
         }
 
-        final String username = ((HASession) session).getUserName();
+        final String username = session.getUserName();
         if ((username != null) && (!username.equals("")) && session.getPrincipal() == null) {
             if (this._debug > 0) {
                 debug("Username retrieved is " + username);
@@ -328,8 +328,8 @@ public class ReplicationAttributeStore extends ReplicationStore {
             _logger.fine("ReplicationAttributeStore>>ssoId=" + ssoId);
         }
 
-        ((HASession) session).setVersion(version);
-        ((HASession) session).setDirty(false);
+        session.setVersion(version);
+        session.setDirty(false);
 
         //now load entries from deserialized entries collection
         ((ModifiedAttributeHASession) session).clearAttributeStates();
