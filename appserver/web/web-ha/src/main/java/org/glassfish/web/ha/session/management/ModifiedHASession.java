@@ -85,11 +85,11 @@ public class ModifiedHASession extends BaseHASession {
 
     @Override
     public boolean isDirty() {
-        return dirtyFlag;
+        return this.dirtyFlag;
     }
 
     @Override
     public void setDirty(boolean isDirty) {
-        dirtyFlag = isDirty;
+        this.dirtyFlag = isDirty;
     }
 }
