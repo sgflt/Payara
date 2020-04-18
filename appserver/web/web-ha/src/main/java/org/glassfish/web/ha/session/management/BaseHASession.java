@@ -63,16 +63,15 @@ import java.util.Enumeration;
  * @author lwhite
  * @author Rajiv Mordani
  */
-public abstract class BaseHASession extends StandardSession
-    implements HASession {
+abstract class BaseHASession extends StandardSession implements HASession {
 
-    protected String userName = "";
-    protected boolean persistentFlag = false;
+    private String userName = "";
+    private boolean persistentFlag = false;
 
     /**
      * Creates a new instance of BaseHASession
      */
-    public BaseHASession(final Manager manager) {
+    BaseHASession(final Manager manager) {
         super(manager);
     }
 
