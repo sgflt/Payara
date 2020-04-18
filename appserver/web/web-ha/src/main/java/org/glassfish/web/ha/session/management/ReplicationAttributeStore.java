@@ -283,10 +283,10 @@ public class ReplicationAttributeStore extends ReplicationStore {
         final String ssoId;
         final long version;
 
-        try {
+        try (
             final ByteArrayInputStream bais = new ByteArrayInputStream(state);
-            final BufferedInputStream bis = new BufferedInputStream(bais);
-
+            final BufferedInputStream bis = new BufferedInputStream(bais)
+        ) {
             //Get the username, ssoId from metadata
             ssoId = metadata.getStringExtraParam();
             version = metadata.getVersion();
@@ -295,27 +295,8 @@ public class ReplicationAttributeStore extends ReplicationStore {
                 _logger.finest("loaded session from replicationstore, length = " + state.length);
             }
 
-            ObjectInputStream ois = null;
-            final ClassLoader classLoader = getClassLoader();
-            if (classLoader != null) {
-                try {
-                    ois = this.ioUtils.createObjectInputStream(bis, true, classLoader, getUniqueId());
-                } catch (final Exception ex) {
-                }
-
-            }
-
-            if (ois == null) {
-                ois = new ObjectInputStream(bis);
-            }
-
-            try {
+            try (final ObjectInputStream ois = getObjectInputStream(bis)) {
                 session = readSession(this.manager, ois);
-            } finally {
-                try {
-                    ois.close();
-                } catch (final IOException e) {
-                }
             }
         } catch (final ClassNotFoundException e) {
             throw new IOException("Error during deserialization: " + e.getMessage(), e);
@@ -498,47 +479,32 @@ public class ReplicationAttributeStore extends ReplicationStore {
      */
     protected Object getAttributeValue(final byte[] state) throws IOException, ClassNotFoundException {
 
-        try {
-            final ByteArrayInputStream bais = new ByteArrayInputStream(state);
-            final BufferedInputStream bis = new BufferedInputStream(bais);
-
-            final ClassLoader classLoader = getClassLoader();
-
-            ObjectInputStream ois = null;
-            if (classLoader != null) {
-                try {
-                    ois = this.ioUtils.createObjectInputStream(bis, true, classLoader, getUniqueId());
-                } catch (final Exception e) {
-                    if (_logger.isLoggable(Level.FINE)) {
-                        _logger.fine("getAttributeValue failed " + e);
-                    }
-                }
-            }
-
-            if (ois == null) {
-                ois = new ObjectInputStream(bis);
-            }
-
-            try {
-                return ois.readObject();
-            } finally {
-                try {
-                    ois.close();
-                } catch (final IOException e) {
-                    if (_logger.isLoggable(Level.SEVERE)) {
-                        _logger.severe("getAttributeValue failed " + e);
-                    }
-                }
-
-            }
+        try (final ByteArrayInputStream bais = new ByteArrayInputStream(state);
+             final BufferedInputStream bis = new BufferedInputStream(bais);
+             final ObjectInputStream ois = getObjectInputStream(bis)
+        ) {
+            return ois.readObject();
         } catch (final ClassNotFoundException e) {
             if (_logger.isLoggable(Level.FINE)) {
                 _logger.log(Level.FINE, "ClassNotFoundException occurred in getAttributeValue", e);
             }
             throw e;
-        } catch (final IOException e) {
-            throw e;
         }
+    }
+
+    private ObjectInputStream getObjectInputStream(final BufferedInputStream bis) throws IOException {
+        final ClassLoader classLoader = getClassLoader();
+        if (classLoader != null) {
+            try {
+                return this.ioUtils.createObjectInputStream(bis, true, classLoader, getUniqueId());
+            } catch (final Exception e) {
+                if (_logger.isLoggable(Level.FINE)) {
+                    _logger.fine("getAttributeValue failed " + e);
+                }
+            }
+        }
+
+        return new ObjectInputStream(bis);
     }
 
     //new serialization code for Collection
@@ -553,46 +519,20 @@ public class ReplicationAttributeStore extends ReplicationStore {
     protected Object getAttributeValueCollection(final byte[] state) throws IOException, ClassNotFoundException {
         final Collection<Object> attributeValueList = new ArrayList<>();
 
-        try {
+        try (
             final ByteArrayInputStream bais = new ByteArrayInputStream(state);
             final BufferedInputStream bis = new BufferedInputStream(bais);
-
-            final ClassLoader classLoader = getClassLoader();
-
-            ObjectInputStream ois = null;
-            if (classLoader != null) {
-                try {
-                    ois = this.ioUtils.createObjectInputStream(bis, true, classLoader, getUniqueId());
-                } catch (final Exception e) {
-                    if (_logger.isLoggable(Level.FINE)) {
-                        _logger.fine("getAttributeValueCollection failed " + e);
-                    }
-                }
+            final ObjectInputStream ois = getObjectInputStream(bis)
+        ) {
+            //first get List size
+            final Object whatIsIt = ois.readObject();
+            int entriesSize = 0;
+            if (whatIsIt instanceof Integer) {
+                entriesSize = (Integer) whatIsIt;
             }
-
-            if (ois == null) {
-                ois = new ObjectInputStream(bis);
-            }
-
-            try {
-                //first get List size
-                final Object whatIsIt = ois.readObject();
-                int entriesSize = 0;
-                if (whatIsIt instanceof Integer) {
-                    entriesSize = (Integer) whatIsIt;
-                }
-                for (int i = 0; i < entriesSize; i++) {
-                    final Object nextAttributeValue = ois.readObject();
-                    attributeValueList.add(nextAttributeValue);
-                }
-            } finally {
-                try {
-                    ois.close();
-                } catch (final IOException e) {
-                    if (_logger.isLoggable(Level.FINE)) {
-                        _logger.fine("getAttributeValueCollection failed " + e);
-                    }
-                }
+            for (int i = 0; i < entriesSize; i++) {
+                final Object nextAttributeValue = ois.readObject();
+                attributeValueList.add(nextAttributeValue);
             }
         } catch (final ClassNotFoundException e) {
             if (_logger.isLoggable(Level.FINE)) {
