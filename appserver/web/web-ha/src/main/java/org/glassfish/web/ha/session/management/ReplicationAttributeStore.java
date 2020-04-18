@@ -170,8 +170,12 @@ public class ReplicationAttributeStore extends ReplicationStore {
             if (_logger.isLoggable(Level.FINE)) {
                 _logger.fine("CompositeMetadata is " + compositeMetadata + " id is " + session.getIdInternal());
             }
-            replicator.save(session.getIdInternal(), //id
-                compositeMetadata, !((HASession) session).isPersistent());
+
+            replicator.save(
+                session.getIdInternal(),
+                compositeMetadata,
+                !((HASession) session).isPersistent()
+            );
             modAttrSession.resetAttributeState();
             postSaveUpdate(modAttrSession);
         } catch (final BackingStoreException ex) {
