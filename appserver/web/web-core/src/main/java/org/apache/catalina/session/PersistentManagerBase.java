@@ -180,6 +180,10 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
      */
     private static final String info = "PersistentManagerBase/1.0";
 
+    /**
+     * The descriptive name of this Manager implementation (for logging).
+     */
+    protected static final String name = "PersistentManagerBase";
 
     /**
      * The lifecycle event support for this component.
@@ -191,12 +195,6 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
      * The maximum number of active Sessions allowed, or -1 for no limit.
      */
     private int maxActiveSessions = -1;
-
-
-    /**
-     * The descriptive name of this Manager implementation (for logging).
-     */
-    protected static final String name = "PersistentManagerBase";
 
 
     /**
