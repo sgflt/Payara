@@ -130,22 +130,6 @@ public class ModifiedAttributeHASession extends BaseHASession {
     }
 
     /**
-     * return an ArrayList of Strings
-     * whose elements are the names of the added attributes
-     */
-    public List<String> getAddedAttributesPrevious() {
-        List<String> resultList = new ArrayList<String>();
-        for (Map.Entry<String, SessionAttributeState> entry : this.attributeStates.entrySet()) {
-            SessionAttributeState nextAttrState = entry.getValue();
-            String nextAttrName = entry.getKey();
-            if (!nextAttrState.isPersistent()) {
-                resultList.add(nextAttrName);
-            }
-        }
-        return resultList;
-    }
-
-    /**
      * clear (empty) the attributeStates
      */
     void clearAttributeStates() {
