@@ -925,14 +925,10 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE, LogFacade.SAVING_PERSISTED_SESSION, String.valueOf(n));
         }
-        for (int i = 0; i < n; i++) {
-            try {
-                swapOut(sessions[i]);
-            } catch (final IOException e) {
-                // This is logged in writeSession()
-            }
-        }
 
+        for (final Session session : sessions) {
+            swapOut(session);
+        }
     }
 
 
@@ -1065,7 +1061,7 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
      *
      * @param session The Session to write out.
      */
-    protected void swapOut(final Session session) throws IOException {
+    protected void swapOut(final Session session) {
 
         if (this.store == null || !session.isValid()) {
             return;
@@ -1084,7 +1080,7 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
      * the copy in memory or triggering passivation events. Does
      * nothing if the session is invalid or past its expiration.
      */
-    protected void writeSession(final Session session) throws IOException {
+    protected void writeSession(final Session session) {
         if (this.store == null || !session.isValid()) {
             return;
         }
@@ -1115,7 +1111,6 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
             }
         } catch (final IOException e) {
             log.log(Level.SEVERE, LogFacade.SERIALIZING_SESSION_EXCEPTION, new Object[]{session.getIdInternal(), e});
-            throw e;
         } finally {
             ((StandardContext) getContainer()).sessionPersistedEndEvent(
                 (StandardSession) session);
@@ -1317,11 +1312,8 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
                     if (log.isLoggable(Level.FINE)) {
                         log.log(Level.FINE, LogFacade.SWAPPING_SESSION_TO_STORE, new Object[]{session.getIdInternal(), timeIdle});
                     }
-                    try {
-                        swapOut(session);
-                    } catch (final IOException e) {
-                        // This is logged in writeSession()
-                    }
+
+                    swapOut(session);
                 }
             }
         }
@@ -1334,7 +1326,6 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
      * Hercules: modified method
      */
     protected void processMaxActiveSwaps() {
-
         if (!isStarted() || getMaxActiveSessions() < 0) {
             return;
         }
@@ -1362,10 +1353,9 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
                     if (log.isLoggable(Level.FINE)) {
                         log.log(Level.FINE, LogFacade.SWAP_OUT_SESSION, new Object[]{session.getIdInternal(), timeIdle});
                     }
+
                     try {
                         swapOut(session);
-                    } catch (final Exception e) {
-                        // This is logged in writeSession()
                     } finally {
                         session.unlockBackground();
                     }
@@ -1405,10 +1395,9 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
                     if (log.isLoggable(Level.FINE)) {
                         log.log(Level.FINE, LogFacade.BACKUP_SESSION_TO_STORE, new Object[]{session.getIdInternal(), timeIdle});
                     }
+
                     try {
                         writeSession(session);
-                    } catch (final Exception e1) {
-                        // This is logged in writeSession()
                     } finally {
                         session.unlockBackground();
                     }
