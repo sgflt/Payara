@@ -384,7 +384,7 @@ public class ReplicationAttributeStore extends ReplicationStore {
             _logger.fine("ReplicationAttributeStore>>createCompositeMetadata:trunkState=" + trunkState);
         }
 
-        final List<SessionAttributeMetadata> entries = new ArrayList<SessionAttributeMetadata>();
+        final List<SessionAttributeMetadata> entries = new ArrayList<>();
         final List<String> addedAttrs = modAttrSession.getAddedAttributes();
         final List<String> modifiedAttrs = modAttrSession.getModifiedAttributes();
         final List<String> deletedAttrs = modAttrSession.getDeletedAttributes();
