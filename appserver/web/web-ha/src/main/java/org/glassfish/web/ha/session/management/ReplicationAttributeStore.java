@@ -277,18 +277,15 @@ public class ReplicationAttributeStore extends ReplicationStore {
         if (metadata == null || metadata.getState() == null) {
             return null;
         }
+
         final byte[] state = metadata.getState();
-        Session session = null;
-        Loader loader = null;
-        ClassLoader classLoader = null;
-        ObjectInputStream ois = null;
-        final Container container = this.manager.getContainer();
+        final Session session;
         final String ssoId;
         final long version;
 
         try {
             final ByteArrayInputStream bais = new ByteArrayInputStream(state);
-            BufferedInputStream bis = new BufferedInputStream(bais);
+            final BufferedInputStream bis = new BufferedInputStream(bais);
 
             //Get the username, ssoId from metadata
             ssoId = metadata.getStringExtraParam();
@@ -297,36 +294,27 @@ public class ReplicationAttributeStore extends ReplicationStore {
             if (_logger.isLoggable(Level.FINEST)) {
                 _logger.finest("loaded session from replicationstore, length = " + state.length);
             }
-            if (container != null) {
-                loader = container.getLoader();
-            }
 
-            if (loader != null) {
-                classLoader = loader.getClassLoader();
-            }
-
+            ObjectInputStream ois = null;
+            final ClassLoader classLoader = getClassLoader();
             if (classLoader != null) {
-
                 try {
                     ois = this.ioUtils.createObjectInputStream(bis, true, classLoader, getUniqueId());
                 } catch (final Exception ex) {
                 }
 
             }
+
             if (ois == null) {
                 ois = new ObjectInputStream(bis);
             }
 
-            if (ois != null) {
+            try {
+                session = readSession(this.manager, ois);
+            } finally {
                 try {
-                    session = readSession(this.manager, ois);
-                } finally {
-
-                    try {
-                        ois.close();
-                        bis = null;
-                    } catch (final IOException e) {
-                    }
+                    ois.close();
+                } catch (final IOException e) {
                 }
             }
         } catch (final ClassNotFoundException e) {
@@ -338,6 +326,8 @@ public class ReplicationAttributeStore extends ReplicationStore {
             if (this._debug > 0) {
                 debug("Username retrieved is " + username);
             }
+
+            final Container container = this.manager.getContainer();
             final java.security.Principal pal =
                 ((com.sun.web.security.RealmAdapter) container.getRealm()).createFailOveredPrincipal(username);
             if (this._debug > 0) {
@@ -506,23 +496,13 @@ public class ReplicationAttributeStore extends ReplicationStore {
      * @param state The byte[] with the session attribute data
      * @return A newly created object for the given session attribute data
      */
-    protected Object getAttributeValue(final byte[] state)
-        throws IOException, ClassNotFoundException {
-        final Container container = this.manager.getContainer();
+    protected Object getAttributeValue(final byte[] state) throws IOException, ClassNotFoundException {
 
         try {
             final ByteArrayInputStream bais = new ByteArrayInputStream(state);
             final BufferedInputStream bis = new BufferedInputStream(bais);
 
-            Loader loader = null;
-            if (container != null) {
-                loader = container.getLoader();
-            }
-
-            ClassLoader classLoader = null;
-            if (loader != null) {
-                classLoader = loader.getClassLoader();
-            }
+            final ClassLoader classLoader = getClassLoader();
 
             ObjectInputStream ois = null;
             if (classLoader != null) {
@@ -572,21 +552,12 @@ public class ReplicationAttributeStore extends ReplicationStore {
      */
     protected Object getAttributeValueCollection(final byte[] state) throws IOException, ClassNotFoundException {
         final Collection<Object> attributeValueList = new ArrayList<>();
-        final Container container = this.manager.getContainer();
 
         try {
             final ByteArrayInputStream bais = new ByteArrayInputStream(state);
             final BufferedInputStream bis = new BufferedInputStream(bais);
 
-            Loader loader = null;
-            if (container != null) {
-                loader = container.getLoader();
-            }
-
-            ClassLoader classLoader = null;
-            if (loader != null) {
-                classLoader = loader.getClassLoader();
-            }
+            final ClassLoader classLoader = getClassLoader();
 
             ObjectInputStream ois = null;
             if (classLoader != null) {
@@ -631,6 +602,20 @@ public class ReplicationAttributeStore extends ReplicationStore {
         }
 
         return attributeValueList;
+    }
+
+    private ClassLoader getClassLoader() {
+        final Container container = this.manager.getContainer();
+        Loader loader = null;
+        if (container != null) {
+            loader = container.getLoader();
+        }
+
+        ClassLoader classLoader = null;
+        if (loader != null) {
+            classLoader = loader.getClassLoader();
+        }
+        return classLoader;
     }
 
     //end new serialization code for Collection
