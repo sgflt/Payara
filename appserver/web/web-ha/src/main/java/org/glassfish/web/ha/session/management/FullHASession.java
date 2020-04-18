@@ -46,8 +46,6 @@
 
 package org.glassfish.web.ha.session.management;
 
-import java.io.Serializable;
-
 import org.apache.catalina.Manager;
 
 /**
