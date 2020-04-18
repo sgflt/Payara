@@ -453,10 +453,10 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
 
 
     /**
-     * Set the started flag
+     * Set the started flag to false
      */
-    protected void setStarted(final boolean started) {
-        this.started = started;
+    private void setStopped() {
+        this.started = false;
     }
 
 
@@ -1229,7 +1229,7 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
         }
 
         this.lifecycle.fireLifecycleEvent(STOP_EVENT, null);
-        setStarted(false);
+        setStopped();
 
         if (getStore() != null && this.saveOnRestart) {
             unload();
