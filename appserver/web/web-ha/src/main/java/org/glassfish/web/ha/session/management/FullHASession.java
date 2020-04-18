@@ -67,6 +67,7 @@ public class FullHASession extends BaseHASession {
      * always return true for isDirty()
      * this type of session is always dirty
      */
+    @Override
     public boolean isDirty() {
         return true;
     }
@@ -83,17 +84,20 @@ public class FullHASession extends BaseHASession {
     public void setDirty(final boolean value) {
 
     }
-    
+
+    @Override
     public void removeAttribute(String name) {
         super.removeAttribute(name);
         setDirty(true);
     }
 
+    @Override
     public void setAttribute(String name, Object value) {
         super.setAttribute(name, value);
         setDirty(true);
     }
 
+    @Override
     public Object getAttribute(String name) {
         setDirty(true);
         return super.getAttribute(name);
