@@ -58,6 +58,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -279,19 +280,16 @@ public class ReplicationAttributeStore extends ReplicationStore {
         }
         final byte[] state = metadata.getState();
         Session _session = null;
-        BufferedInputStream bis = null;
-        ByteArrayInputStream bais = null;
         Loader loader = null;
         ClassLoader classLoader = null;
         ObjectInputStream ois = null;
         final Container container = this.manager.getContainer();
-        java.security.Principal pal = null; //MERGE chg added
-        String ssoId = null;
-        long version = 0L;
+        final String ssoId;
+        final long version;
 
         try {
-            bais = new ByteArrayInputStream(state);
-            bis = new BufferedInputStream(bais);
+            final ByteArrayInputStream bais = new ByteArrayInputStream(state);
+            BufferedInputStream bis = new BufferedInputStream(bais);
 
             //Get the username, ssoId from metadata
             ssoId = metadata.getStringExtraParam();
@@ -341,7 +339,8 @@ public class ReplicationAttributeStore extends ReplicationStore {
             if (this._debug > 0) {
                 debug("Username retrieved is " + username);
             }
-            pal = ((com.sun.web.security.RealmAdapter) container.getRealm()).createFailOveredPrincipal(username);
+            final java.security.Principal pal =
+                ((com.sun.web.security.RealmAdapter) container.getRealm()).createFailOveredPrincipal(username);
             if (this._debug > 0) {
                 debug("principal created using username  " + pal);
             }
@@ -365,9 +364,8 @@ public class ReplicationAttributeStore extends ReplicationStore {
         //now load entries from deserialized entries collection
         ((ModifiedAttributeHASession) _session).clearAttributeStates();
         final byte[] entriesState = metadata.getState();
-        Collection entries = null;
         if (entriesState != null) {
-            entries = this.deserializeStatesCollection(entriesState);
+            final Collection<?> entries = this.deserializeStatesCollection(entriesState);
             loadAttributes((ModifiedAttributeHASession) _session, entries);
         }
         loadAttributes((ModifiedAttributeHASession) _session, metadata.getEntries());
@@ -706,26 +704,27 @@ public class ReplicationAttributeStore extends ReplicationStore {
      *
      * @param modifiedAttributeSession The session (header info only) having its attributes loaded
      * @param attributeList            The List<AttributeMetadata> list of loaded attributes
-     * @return A newly created object for the given session attribute data
      */
     protected void loadAttributes(final ModifiedAttributeHASession modifiedAttributeSession,
-                                  final Collection attributeList) {
+                                  final Collection<?> attributeList) {
         if (_logger.isLoggable(Level.FINEST)) {
             _logger.finest("in loadAttributes -- ReplicationAttributeStore : session id=" + modifiedAttributeSession.getIdInternal());
         }
 
-        String thisAttrName = null;
-        Object thisAttrVal = null;
-        final Iterator it = attributeList.iterator();
-        while (it.hasNext()) {
-            final SessionAttributeMetadata nextAttrMetadata = (SessionAttributeMetadata) it.next();
-            thisAttrName = nextAttrMetadata.getAttributeName();
-            //thisAttrOp = nextAttrMetadata.getOperation();
+        for (final Object o : attributeList) {
+            final SessionAttributeMetadata nextAttrMetadata = (SessionAttributeMetadata) o;
+            final String thisAttrName = nextAttrMetadata.getAttributeName();
             final byte[] nextAttrState = nextAttrMetadata.getState();
-            thisAttrVal = null;
-
             try {
-                thisAttrVal = getAttributeValue(nextAttrState);
+                final Object thisAttrVal = getAttributeValue(nextAttrState);
+                if (thisAttrVal != null) {
+                    if (_logger.isLoggable(Level.FINEST)) {
+                        _logger.finest("Setting Attribute: " + thisAttrName);
+                    }
+                    modifiedAttributeSession.setAttribute(thisAttrName, thisAttrVal);
+                    modifiedAttributeSession.setAttributeStatePersistent(thisAttrName, false);
+                    modifiedAttributeSession.setAttributeStateDirty(thisAttrName, false);
+                }
             } catch (final ClassNotFoundException | IOException e) {
                 if (_logger.isLoggable(Level.SEVERE)) {
                     _logger.severe("loadAttributes failed " + e);
@@ -735,23 +734,14 @@ public class ReplicationAttributeStore extends ReplicationStore {
             if (_logger.isLoggable(Level.FINEST)) {
                 _logger.finest("Attr retrieved======" + thisAttrName);
             }
-
-            if (thisAttrVal != null) { //start if
-                if (_logger.isLoggable(Level.FINEST)) {
-                    _logger.finest("Setting Attribute: " + thisAttrName);
-                }
-                modifiedAttributeSession.setAttribute(thisAttrName, thisAttrVal);
-                modifiedAttributeSession.setAttributeStatePersistent(thisAttrName, false);
-                modifiedAttributeSession.setAttributeStateDirty(thisAttrName, false);
-            } //end if
-        } //end while 
+        }
     }
 
-    private Collection deserializeStatesCollection(final byte[] entriesState) {
-        Collection result = new ArrayList();
+    private Collection<?> deserializeStatesCollection(final byte[] entriesState) {
+        Collection<?> result = Collections.emptyList();
 
         try {
-            result = (Collection) getAttributeValueCollection(entriesState);
+            result = (Collection<?>) getAttributeValueCollection(entriesState);
         } catch (final ClassNotFoundException | IOException e) {
             if (_logger.isLoggable(Level.SEVERE)) {
                 _logger.severe("loadAttributes failed " + e);
