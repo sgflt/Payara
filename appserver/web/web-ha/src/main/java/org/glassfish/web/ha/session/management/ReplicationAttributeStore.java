@@ -513,7 +513,6 @@ public class ReplicationAttributeStore extends ReplicationStore {
         ObjectInputStream ois = null;
         final Container container = this.manager.getContainer();
 
-
         try {
             final ByteArrayInputStream bais = new ByteArrayInputStream(state);
             final BufferedInputStream bis = new BufferedInputStream(bais);
@@ -571,56 +570,56 @@ public class ReplicationAttributeStore extends ReplicationStore {
      * @param state The byte[] with the session attribute data
      * @return A newly created object for the given session attribute data
      */
-    protected Object getAttributeValueCollection(final byte[] state)
-        throws IOException, ClassNotFoundException {
-        final Collection<Object> attributeValueList = new ArrayList<Object>();
-        BufferedInputStream bis = null;
-        ByteArrayInputStream bais = null;
-        Loader loader = null;
-        ClassLoader classLoader = null;
-        ObjectInputStream ois = null;
+    protected Object getAttributeValueCollection(final byte[] state) throws IOException, ClassNotFoundException {
+        final Collection<Object> attributeValueList = new ArrayList<>();
         final Container container = this.manager.getContainer();
 
         try {
-            bais = new ByteArrayInputStream(state);
-            bis = new BufferedInputStream(bais);
+            final ByteArrayInputStream bais = new ByteArrayInputStream(state);
+            final BufferedInputStream bis = new BufferedInputStream(bais);
 
+            Loader loader = null;
             if (container != null) {
                 loader = container.getLoader();
             }
 
+            ClassLoader classLoader = null;
             if (loader != null) {
                 classLoader = loader.getClassLoader();
             }
 
+            ObjectInputStream ois = null;
             if (classLoader != null) {
-
                 try {
                     ois = this.ioUtils.createObjectInputStream(bis, true, classLoader, getUniqueId());
-                } catch (final Exception ex) {
+                } catch (final Exception e) {
+                    if (_logger.isLoggable(Level.FINE)) {
+                        _logger.fine("getAttributeValueCollection failed " + e);
+                    }
                 }
-
             }
+
             if (ois == null) {
                 ois = new ObjectInputStream(bis);
             }
-            if (ois != null) {
+
+            try {
+                //first get List size
+                final Object whatIsIt = ois.readObject();
+                int entriesSize = 0;
+                if (whatIsIt instanceof Integer) {
+                    entriesSize = (Integer) whatIsIt;
+                }
+                for (int i = 0; i < entriesSize; i++) {
+                    final Object nextAttributeValue = ois.readObject();
+                    attributeValueList.add(nextAttributeValue);
+                }
+            } finally {
                 try {
-                    //first get List size
-                    final Object whatIsIt = ois.readObject();
-                    int entriesSize = 0;
-                    if (whatIsIt instanceof Integer) {
-                        entriesSize = ((Integer) whatIsIt).intValue();
-                    }
-                    for (int i = 0; i < entriesSize; i++) {
-                        final Object nextAttributeValue = ois.readObject();
-                        attributeValueList.add(nextAttributeValue);
-                    }
-                } finally {
-                    try {
-                        ois.close();
-                        bis = null;
-                    } catch (final IOException e) {
+                    ois.close();
+                } catch (final IOException e) {
+                    if (_logger.isLoggable(Level.FINE)) {
+                        _logger.fine("getAttributeValueCollection failed " + e);
                     }
                 }
             }
@@ -628,8 +627,6 @@ public class ReplicationAttributeStore extends ReplicationStore {
             if (_logger.isLoggable(Level.FINE)) {
                 _logger.log(Level.FINE, "ClassNotFoundException occurred in getAttributeValueCollection", e);
             }
-            throw e;
-        } catch (final IOException e) {
             throw e;
         }
 
