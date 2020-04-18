@@ -64,119 +64,119 @@ import java.util.List;
 import java.util.logging.Level;
 
 /**
- *
  * @author Larry White
  * @author Rajiv Mordani
  */
 public class ReplicationAttributeStore extends ReplicationStore {
-    
 
-    /** Creates a new instance of ReplicationAttributeStore */
-    public ReplicationAttributeStore(JavaEEIOUtils ioUtils) {
+
+    /**
+     * Creates a new instance of ReplicationAttributeStore
+     */
+    public ReplicationAttributeStore(final JavaEEIOUtils ioUtils) {
         super(ioUtils);
         setLogLevel();
     }
-    
+
     // HAStorePoolElement methods begin
-    
+
     /**
      * Save the specified Session into this Store.  Any previously saved
      * information for the associated session identifier is replaced.
      *
      * @param session Session to be saved
-     *
-     * @exception IOException if an input/output error occurs
-     */    
-    public void valveSave(Session session) throws IOException {
+     * @throws IOException if an input/output error occurs
+     */
+    @Override
+    public void valveSave(final Session session) throws IOException {
         if (!(session instanceof HASession)) {
             return;
         }
-        HASession haSess = (HASession)session;
-        if( haSess.isPersistent() && !haSess.isDirty() ) {
+        final HASession haSess = (HASession) session;
+        if (haSess.isPersistent() && !haSess.isDirty()) {
             this.updateLastAccessTime(session);
         } else {
             this.doValveSave(session);
             haSess.setPersistent(true);
         }
-        haSess.setDirty(false);        
-    } 
-    
+        haSess.setDirty(false);
+    }
+
     // Store method begin
-    
+
     /**
      * Save the specified Session into this Store.  Any previously saved
      * information for the associated session identifier is replaced.
      *
      * @param session Session to be saved
-     *
-     * @exception IOException if an input/output error occurs
-     */    
-    public void save(Session session) throws IOException {
+     * @throws IOException if an input/output error occurs
+     */
+    @Override
+    public void save(final Session session) throws IOException {
         if (!(session instanceof HASession)) {
             return;
         }
-        HASession haSess = (HASession)session;
-        if( haSess.isPersistent() && !haSess.isDirty() ) {
+        final HASession haSess = (HASession) session;
+        if (haSess.isPersistent() && !haSess.isDirty()) {
             this.updateLastAccessTime(session);
         } else {
             this.doSave(session);
             haSess.setPersistent(true);
         }
-        haSess.setDirty(false);        
+        haSess.setDirty(false);
     }
-    
-    
+
+
     /**
      * Save the specified Session into this Store.  Any previously saved
      * information for the associated session identifier is replaced.
      *
      * @param session Session to be saved
-     *
-     * @exception IOException if an input/output error occurs
+     * @throws IOException if an input/output error occurs
      */
     @Override
-    public void doValveSave(Session session) throws IOException {
-        if(_logger.isLoggable(Level.FINE)) {
-            _logger.fine("ReplicationAttributeStore>>doValveSave:valid =" + ((StandardSession)session).getIsValid());
+    public void doValveSave(final Session session) throws IOException {
+        if (_logger.isLoggable(Level.FINE)) {
+            _logger.fine("ReplicationAttributeStore>>doValveSave:valid =" + ((StandardSession) session).getIsValid());
             if (session instanceof HASession) {
-                _logger.fine("ReplicationAttributeStore>>valveSave:ssoId=" + ((HASession)session).getSsoId());
+                _logger.fine("ReplicationAttributeStore>>valveSave:ssoId=" + ((HASession) session).getSsoId());
             }
-        }         
-        
+        }
+
         // begin 6470831 do not save if session is not valid
-        if( !((StandardSession)session).getIsValid() ) {
+        if (!((StandardSession) session).getIsValid()) {
             return;
         }
         // end 6470831
 
         if (!(session instanceof ModifiedAttributeHASession) ||
-                !(session instanceof BaseHASession)) {
+            !(session instanceof BaseHASession)) {
             return;
         }
 
-        ModifiedAttributeHASession modAttrSession
-                = (ModifiedAttributeHASession)session;
+        final ModifiedAttributeHASession modAttrSession
+            = (ModifiedAttributeHASession) session;
         String userName = "";
-        if(session.getPrincipal() !=null){
+        if (session.getPrincipal() != null) {
             userName = session.getPrincipal().getName();
-            ((BaseHASession)session).setUserName(userName);
+            ((BaseHASession) session).setUserName(userName);
         }
-        BackingStore<String, CompositeMetadata> replicator = getCompositeMetadataBackingStore();
-        if(_logger.isLoggable(Level.FINE)) {
-            _logger.fine("ReplicationAttributeStore>>save: replicator: " + replicator);                    
-        }         
-        CompositeMetadata compositeMetadata
+        final BackingStore<String, CompositeMetadata> replicator = getCompositeMetadataBackingStore();
+        if (_logger.isLoggable(Level.FINE)) {
+            _logger.fine("ReplicationAttributeStore>>save: replicator: " + replicator);
+        }
+        final CompositeMetadata compositeMetadata
             = createCompositeMetadata(modAttrSession);
-                
+
         try {
             if (_logger.isLoggable(Level.FINE)) {
                 _logger.fine("CompositeMetadata is " + compositeMetadata + " id is " + session.getIdInternal());
             }
             replicator.save(session.getIdInternal(), //id
-                    compositeMetadata, !((HASession) session).isPersistent());
+                compositeMetadata, !((HASession) session).isPersistent());
             modAttrSession.resetAttributeState();
             postSaveUpdate(modAttrSession);
-        } catch (BackingStoreException ex) {
+        } catch (final BackingStoreException ex) {
             //FIXME
         }
     }
@@ -187,76 +187,75 @@ public class ReplicationAttributeStore extends ReplicationStore {
      * information for the associated session identifier is replaced.
      *
      * @param session Session to be saved
-     *
-     * @exception IOException if an input/output error occurs
+     * @throws IOException if an input/output error occurs
      */
     @Override
-    public void doSave(Session session) throws IOException {
+    public void doSave(final Session session) throws IOException {
         // begin 6470831 do not save if session is not valid
-        if( !((StandardSession)session).getIsValid() ) {
+        if (!((StandardSession) session).getIsValid()) {
             return;
         }
 
         if (!(session instanceof ModifiedAttributeHASession) ||
-                !(session instanceof HASession)) {
+            !(session instanceof HASession)) {
             return;
         }
 
         // end 6470831        
-        ModifiedAttributeHASession modAttrSession
-                = (ModifiedAttributeHASession)session;
-        BackingStore<String, CompositeMetadata> replicator = getCompositeMetadataBackingStore();
-        if(_logger.isLoggable(Level.FINE)) {
-            _logger.fine("ReplicationAttributeStore>>doSave: replicator: " + replicator);                    
-        }         
-        CompositeMetadata compositeMetadata 
+        final ModifiedAttributeHASession modAttrSession
+            = (ModifiedAttributeHASession) session;
+        final BackingStore<String, CompositeMetadata> replicator = getCompositeMetadataBackingStore();
+        if (_logger.isLoggable(Level.FINE)) {
+            _logger.fine("ReplicationAttributeStore>>doSave: replicator: " + replicator);
+        }
+        final CompositeMetadata compositeMetadata
             = createCompositeMetadata(modAttrSession);
-                
+
         try {
             if (_logger.isLoggable(Level.FINE)) {
                 _logger.fine("CompositeMetadata is " + compositeMetadata + " id is " + session.getIdInternal());
             }
 
             replicator.save(session.getIdInternal(), //id
-                    compositeMetadata, !((HASession) session).isPersistent());
+                compositeMetadata, !((HASession) session).isPersistent());
             modAttrSession.resetAttributeState();
             postSaveUpdate(modAttrSession);
-        } catch (BackingStoreException ex) {
+        } catch (final BackingStoreException ex) {
             //FIXME
         }
     }
 
     @SuppressWarnings("unchecked")
     private BackingStore<String, CompositeMetadata> getCompositeMetadataBackingStore() {
-        ReplicationManagerBase<CompositeMetadata> mgr
-                = (ReplicationManagerBase<CompositeMetadata>) this.getManager();
+        final ReplicationManagerBase<CompositeMetadata> mgr
+            = (ReplicationManagerBase<CompositeMetadata>) this.getManager();
         return mgr.getBackingStore();
     }
 
     @Override
-    public Session load(String id, String version)
-            throws ClassNotFoundException, IOException {
+    public Session load(final String id, final String version)
+        throws ClassNotFoundException, IOException {
         try {
-            CompositeMetadata metaData =
-                    getCompositeMetadataBackingStore().load(id, version);
-            if(_logger.isLoggable(Level.FINE)) {
+            final CompositeMetadata metaData =
+                getCompositeMetadataBackingStore().load(id, version);
+            if (_logger.isLoggable(Level.FINE)) {
                 _logger.fine("ReplicationAttributeStore>>load:id=" + id + ", metaData=" + metaData);
             }
-            Session session = getSession(metaData);
+            final Session session = getSession(metaData);
             validateAndSave(session);
             return session;
-        } catch (BackingStoreException ex) {
-            IOException ex1 =
-                    (IOException) new IOException("Error during load: " + ex.getMessage()).initCause(ex);
+        } catch (final BackingStoreException ex) {
+            final IOException ex1 =
+                (IOException) new IOException("Error during load: " + ex.getMessage()).initCause(ex);
             throw ex1;
         }
     }
 
-    private void validateAndSave(Session session) throws IOException {
+    private void validateAndSave(final Session session) throws IOException {
         if (session != null) {
             if (_logger.isLoggable(Level.FINE)) {
                 _logger.fine("ReplicationAttributeStore>>validateAndSave saving " +
-                        "the session after loading it. Session=" + session);
+                    "the session after loading it. Session=" + session);
             }
             //save session - save will reset dirty to false
             ((HASession) session).setDirty(true);
@@ -269,37 +268,35 @@ public class ReplicationAttributeStore extends ReplicationStore {
     }
 
 
-    public Session getSession(CompositeMetadata metadata)
-        throws IOException 
-    {
+    public Session getSession(final CompositeMetadata metadata)
+        throws IOException {
         if (metadata == null || metadata.getState() == null) {
             return null;
         }
-        byte[] state = metadata.getState();
+        final byte[] state = metadata.getState();
         Session _session = null;
         BufferedInputStream bis = null;
         ByteArrayInputStream bais = null;
-        Loader loader = null;    
+        Loader loader = null;
         ClassLoader classLoader = null;
         ObjectInputStream ois = null;
-        Container container = manager.getContainer();
-        java.security.Principal pal=null; //MERGE chg added
+        final Container container = this.manager.getContainer();
+        java.security.Principal pal = null; //MERGE chg added
         String ssoId = null;
         long version = 0L;
-            
-        try
-        {
+
+        try {
             bais = new ByteArrayInputStream(state);
             bis = new BufferedInputStream(bais);
-            
+
             //Get the username, ssoId from metadata
             //ssoId = metadata.getSsoId();
             ssoId = metadata.getStringExtraParam();
             version = metadata.getVersion();
             //debug("ReplicationStore.getSession()  id="+id+"  username ="+username+";");    
 
-            if(_logger.isLoggable(Level.FINEST)) {
-                _logger.finest("loaded session from replicationstore, length = "+state.length);
+            if (_logger.isLoggable(Level.FINEST)) {
+                _logger.finest("loaded session from replicationstore, length = " + state.length);
             }
             if (container != null) {
                 loader = container.getLoader();
@@ -308,190 +305,184 @@ public class ReplicationAttributeStore extends ReplicationStore {
             if (loader != null) {
                 classLoader = loader.getClassLoader();
             }
-            
+
             if (classLoader != null) {
 
                 try {
-                    ois = ioUtils.createObjectInputStream(bis, true, classLoader, getUniqueId());
-                } catch (Exception ex) {}
+                    ois = this.ioUtils.createObjectInputStream(bis, true, classLoader, getUniqueId());
+                } catch (final Exception ex) {
+                }
 
             }
             if (ois == null) {
-                ois = new ObjectInputStream(bis); 
+                ois = new ObjectInputStream(bis);
             }
-            
-            if(ois != null) {
+
+            if (ois != null) {
                 try {
-                    _session = readSession(manager, ois);
-                } 
-                finally {
+                    _session = readSession(this.manager, ois);
+                } finally {
 
                     try {
                         ois.close();
                         bis = null;
-                    }
-                    catch (IOException e) {
+                    } catch (final IOException e) {
                     }
                 }
             }
-        }
-        catch(ClassNotFoundException e)
-        {
-            IOException ex1 = (IOException) new IOException(
-                    "Error during deserialization: " + e.getMessage()).initCause(e);
+        } catch (final ClassNotFoundException e) {
+            final IOException ex1 = (IOException) new IOException(
+                "Error during deserialization: " + e.getMessage()).initCause(e);
             throw ex1;
-        }
-        catch(IOException e)
-        {
+        } catch (final IOException e) {
             throw e;
         }
-        String username = ((HASession)_session).getUserName(); 
-        if((username !=null) && (!username.equals("")) && _session.getPrincipal() == null) {
-            if (_debug > 0) {
-                debug("Username retrieved is "+username);
+        final String username = ((HASession) _session).getUserName();
+        if ((username != null) && (!username.equals("")) && _session.getPrincipal() == null) {
+            if (this._debug > 0) {
+                debug("Username retrieved is " + username);
             }
-            pal = ((com.sun.web.security.RealmAdapter)container.getRealm()).createFailOveredPrincipal(username);
-            if (_debug > 0) {
-                debug("principal created using username  "+pal);
+            pal = ((com.sun.web.security.RealmAdapter) container.getRealm()).createFailOveredPrincipal(username);
+            if (this._debug > 0) {
+                debug("principal created using username  " + pal);
             }
-            if(pal != null) {
+            if (pal != null) {
                 _session.setPrincipal(pal);
-                if (_debug > 0) {
-                    debug("getSession principal="+pal+" was added to session="+_session); 
-                }                
-            }            
+                if (this._debug > 0) {
+                    debug("getSession principal=" + pal + " was added to session=" + _session);
+                }
+            }
         }
         //--SRI        
-        
+
         _session.setNew(false);
-        if(_logger.isLoggable(Level.FINE)) {
-            _logger.fine("ReplicationAttributeStore>>ssoId=" + ssoId);                       
+        if (_logger.isLoggable(Level.FINE)) {
+            _logger.fine("ReplicationAttributeStore>>ssoId=" + ssoId);
         }        
 /*
         ((BaseHASession)_session).setSsoId(ssoId);
         if((ssoId !=null) && (!ssoId.equals("")))
             associate(ssoId, _session);
 */
-        ((HASession)_session).setVersion(version);
-        ((HASession)_session).setDirty(false);
-        
+        ((HASession) _session).setVersion(version);
+        ((HASession) _session).setDirty(false);
+
         //now load entries from deserialized entries collection
-        ((ModifiedAttributeHASession)_session).clearAttributeStates();
-        byte[] entriesState = metadata.getState();
+        ((ModifiedAttributeHASession) _session).clearAttributeStates();
+        final byte[] entriesState = metadata.getState();
         Collection entries = null;
-        if(entriesState != null) {
+        if (entriesState != null) {
             entries = this.deserializeStatesCollection(entriesState);
-            loadAttributes((ModifiedAttributeHASession)_session, entries);
+            loadAttributes((ModifiedAttributeHASession) _session, entries);
         }
-        loadAttributes((ModifiedAttributeHASession)_session, metadata.getEntries());
+        loadAttributes((ModifiedAttributeHASession) _session, metadata.getEntries());
         return _session;
     }
-    
+
 
     //metadata related
-    
-    private void postSaveUpdate(ModifiedAttributeHASession modAttrSession) {
-        if(_logger.isLoggable(Level.FINE)) {
-            _logger.fine("ReplicationAttributeStore>>postSaveUpdate");                       
+
+    private void postSaveUpdate(final ModifiedAttributeHASession modAttrSession) {
+        if (_logger.isLoggable(Level.FINE)) {
+            _logger.fine("ReplicationAttributeStore>>postSaveUpdate");
         }
-        List<String> addedAttrs = modAttrSession.getAddedAttributes();
-        List<String> modifiedAttrs = modAttrSession.getModifiedAttributes();
-        List<String> deletedAttrs = modAttrSession.getDeletedAttributes();
+        final List<String> addedAttrs = modAttrSession.getAddedAttributes();
+        final List<String> modifiedAttrs = modAttrSession.getModifiedAttributes();
+        final List<String> deletedAttrs = modAttrSession.getDeletedAttributes();
         printAttrList("ADDED", addedAttrs);
         printAttrList("MODIFIED", modifiedAttrs);
         printAttrList("DELETED", deletedAttrs);
 
         postProcessSetAttrStates(modAttrSession, addedAttrs);
         postProcessSetAttrStates(modAttrSession, modifiedAttrs);
-        
+
     }
-    
-    private void postProcessSetAttrStates(ModifiedAttributeHASession modAttrSession, List<String> attrsList) {
+
+    private void postProcessSetAttrStates(final ModifiedAttributeHASession modAttrSession, final List<String> attrsList) {
         for (final String nextStateName : attrsList) {
             modAttrSession.setAttributeStatePersistent(nextStateName, true);
             modAttrSession.setAttributeStateDirty(nextStateName, false);
         }
     }
-    
-    private CompositeMetadata createCompositeMetadata(ModifiedAttributeHASession modAttrSession) throws IOException {
-        
+
+    private CompositeMetadata createCompositeMetadata(final ModifiedAttributeHASession modAttrSession) throws IOException {
+
         byte[] trunkState = null;
         if (!modAttrSession.isNew()) {
             try {
                 trunkState = this.getByteArray(modAttrSession);
-            } catch(IOException ex) {
-                if(ex instanceof NotSerializableException) {
+            } catch (final IOException ex) {
+                if (ex instanceof NotSerializableException) {
                     throw ex;
                 }
             }
         }
-        if(_logger.isLoggable(Level.FINE)) {
-            _logger.fine("ReplicationAttributeStore>>createCompositeMetadata:trunkState=" + trunkState);                       
-        }         
-       
-        List<SessionAttributeMetadata> entries = new ArrayList<SessionAttributeMetadata>();
-        List<String> addedAttrs = modAttrSession.getAddedAttributes();
-        List<String> modifiedAttrs = modAttrSession.getModifiedAttributes();
-        List<String> deletedAttrs = modAttrSession.getDeletedAttributes();
+        if (_logger.isLoggable(Level.FINE)) {
+            _logger.fine("ReplicationAttributeStore>>createCompositeMetadata:trunkState=" + trunkState);
+        }
+
+        final List<SessionAttributeMetadata> entries = new ArrayList<SessionAttributeMetadata>();
+        final List<String> addedAttrs = modAttrSession.getAddedAttributes();
+        final List<String> modifiedAttrs = modAttrSession.getModifiedAttributes();
+        final List<String> deletedAttrs = modAttrSession.getDeletedAttributes();
         printAttrList("ADDED", addedAttrs);
         printAttrList("MODIFIED", modifiedAttrs);
         printAttrList("DELETED", deletedAttrs);
-        
-        addToEntries(modAttrSession, entries, 
-                SessionAttributeMetadata.Operation.ADD, addedAttrs);
-        addToEntries(modAttrSession, entries, 
-                SessionAttributeMetadata.Operation.UPDATE, modifiedAttrs);
-        addToEntries(modAttrSession, entries,
-                SessionAttributeMetadata.Operation.DELETE, deletedAttrs);
 
-        CompositeMetadata result 
+        addToEntries(modAttrSession, entries,
+            SessionAttributeMetadata.Operation.ADD, addedAttrs);
+        addToEntries(modAttrSession, entries,
+            SessionAttributeMetadata.Operation.UPDATE, modifiedAttrs);
+        addToEntries(modAttrSession, entries,
+            SessionAttributeMetadata.Operation.DELETE, deletedAttrs);
+
+        final CompositeMetadata result
             = new CompositeMetadata(modAttrSession.getVersion(),
-                modAttrSession.getLastAccessedTimeInternal(),
-                modAttrSession.getMaxInactiveInterval()*1000L,
-                entries, trunkState, null);
+            modAttrSession.getLastAccessedTimeInternal(),
+            modAttrSession.getMaxInactiveInterval() * 1000L,
+            entries, trunkState, null);
         return result;
     }
-    
-    private void printAttrList(String attrListType, List<String> attrList) {
+
+    private void printAttrList(final String attrListType, final List<String> attrList) {
         if (_logger.isLoggable(Level.FINE)) {
             _logger.fine("AttributeType = " + attrListType);
             String nextAttrName = null;
-            for(int i=0; i<attrList.size(); i++) {
+            for (int i = 0; i < attrList.size(); i++) {
                 nextAttrName = attrList.get(i);
                 _logger.fine("attribute[" + i + "]=" + nextAttrName);
             }
         }
     }
-    
-    private void addToEntries(ModifiedAttributeHASession modAttrSession,
-            List<SessionAttributeMetadata> entries, SessionAttributeMetadata.Operation op,
-            List<String> attrList) {
+
+    private void addToEntries(final ModifiedAttributeHASession modAttrSession,
+                              final List<SessionAttributeMetadata> entries, final SessionAttributeMetadata.Operation op,
+                              final List<String> attrList) {
         String nextAttrName = null;
         Object nextAttrValue = null;
         byte[] nextValue = null;
-        for(int i=0; i<attrList.size(); i++) {
+        for (int i = 0; i < attrList.size(); i++) {
             nextAttrName = attrList.get(i);
             nextAttrValue = ((StandardSession) modAttrSession).getAttribute(nextAttrName);
             nextValue = null;
             try {
                 nextValue = getByteArray(nextAttrValue);
-            } catch (IOException ex) {}
-            SessionAttributeMetadata nextAttrMetadata
+            } catch (final IOException ex) {
+            }
+            final SessionAttributeMetadata nextAttrMetadata
                 = new SessionAttributeMetadata(nextAttrName, op, nextValue);
             entries.add(nextAttrMetadata);
         }
     }
-    
+
     /**
-    * Create an byte[] for the session that we can then pass to
-    * the HA Store.
-    *
-    * @param attributeValue
-    *   The attribute value we are serializing
-    *
-    */
-    protected byte[] getByteArray(Object attributeValue)
-      throws IOException {
+     * Create an byte[] for the session that we can then pass to
+     * the HA Store.
+     *
+     * @param attributeValue The attribute value we are serializing
+     */
+    protected byte[] getByteArray(final Object attributeValue)
+        throws IOException {
         ByteArrayOutputStream bos = null;
         ObjectOutputStream oos = null;
 
@@ -499,58 +490,53 @@ public class ReplicationAttributeStore extends ReplicationStore {
         byte[] obs;
         try {
             bos = new ByteArrayOutputStream();
-            
+
 
             try {
-                oos = ioUtils.createObjectOutputStream(new BufferedOutputStream(bos), true);
-            } catch (Exception ex) {}
+                oos = this.ioUtils.createObjectOutputStream(new BufferedOutputStream(bos), true);
+            } catch (final Exception ex) {
+            }
 
             //use normal ObjectOutputStream if there is a failure during stream creation
-            if(oos == null) {
-                oos = new ObjectOutputStream(new BufferedOutputStream(bos)); 
-            }            
+            if (oos == null) {
+                oos = new ObjectOutputStream(new BufferedOutputStream(bos));
+            }
             oos.writeObject(attributeValue);
             oos.close();
             oos = null;
 
             obs = bos.toByteArray();
-        }
-        finally {
-            if ( oos != null )  {
+        } finally {
+            if (oos != null) {
                 oos.close();
             }
         }
 
         return obs;
     }
-    
+
     /**
-    * Given a byte[] containing session data, return a session
-    * object
-    *
-    * @param state
-    *   The byte[] with the session attribute data
-    *
-    * @return
-    *   A newly created object for the given session attribute data
-    */
-    protected Object getAttributeValue(byte[] state) 
-        throws IOException, ClassNotFoundException 
-    {
+     * Given a byte[] containing session data, return a session
+     * object
+     *
+     * @param state The byte[] with the session attribute data
+     * @return A newly created object for the given session attribute data
+     */
+    protected Object getAttributeValue(final byte[] state)
+        throws IOException, ClassNotFoundException {
         Object attributeValue = null;
         BufferedInputStream bis = null;
         ByteArrayInputStream bais = null;
-        Loader loader = null;    
+        Loader loader = null;
         ClassLoader classLoader = null;
         ObjectInputStream ois = null;
-        Container container = manager.getContainer();
-        
-            
-        try
-        {
+        final Container container = this.manager.getContainer();
+
+
+        try {
             bais = new ByteArrayInputStream(state);
             bis = new BufferedInputStream(bais);
-            
+
             if (container != null) {
                 loader = container.getLoader();
             }
@@ -558,126 +544,115 @@ public class ReplicationAttributeStore extends ReplicationStore {
             if (loader != null) {
                 classLoader = loader.getClassLoader();
             }
-            
+
             if (classLoader != null) {
 
                 try {
-                    ois = ioUtils.createObjectInputStream(bis, true, classLoader, getUniqueId());
-                } catch (Exception ex) {}
+                    ois = this.ioUtils.createObjectInputStream(bis, true, classLoader, getUniqueId());
+                } catch (final Exception ex) {
+                }
 
             }
             if (ois == null) {
-                ois = new ObjectInputStream(bis); 
+                ois = new ObjectInputStream(bis);
             }
-            
-            if(ois != null) {
+
+            if (ois != null) {
                 try {
                     attributeValue = ois.readObject();
-                } 
-                finally {
+                } finally {
 
                     try {
                         ois.close();
                         bis = null;
-                    }
-                    catch (IOException e) {
+                    } catch (final IOException e) {
                     }
 
                 }
             }
-        }
-        catch(ClassNotFoundException e)
-        {
+        } catch (final ClassNotFoundException e) {
 
             if (_logger.isLoggable(Level.FINE)) {
                 _logger.log(Level.FINE, "ClassNotFoundException occurred in getAttributeValue", e);
             }
             throw e;
-        }
-        catch(IOException e)
-        {
+        } catch (final IOException e) {
             throw e;
-        }      
+        }
 
         return attributeValue;
     }
-    
+
     //new serialization code for Collection
+
     /**
-    * Create an byte[] for the session that we can then pass to
-    * the HA Store.
-    *
-    * @param entries
-    *   The Collection of entries we are serializing
-    *
-    */
-    protected byte[] getByteArrayFromCollection(Collection entries)
-      throws IOException {
+     * Create an byte[] for the session that we can then pass to
+     * the HA Store.
+     *
+     * @param entries The Collection of entries we are serializing
+     */
+    protected byte[] getByteArrayFromCollection(final Collection entries)
+        throws IOException {
         ByteArrayOutputStream bos = null;
         ObjectOutputStream oos = null;
 
-        
+
         byte[] obs;
         try {
             bos = new ByteArrayOutputStream();
-            
+
 
             try {
-                oos = ioUtils.createObjectOutputStream(new BufferedOutputStream(bos), true);
-            } catch (Exception ex) {}
+                oos = this.ioUtils.createObjectOutputStream(new BufferedOutputStream(bos), true);
+            } catch (final Exception ex) {
+            }
 
             //use normal ObjectOutputStream if there is a failure during stream creation
-            if(oos == null) {
-                oos = new ObjectOutputStream(new BufferedOutputStream(bos)); 
+            if (oos == null) {
+                oos = new ObjectOutputStream(new BufferedOutputStream(bos));
             }
             //first write out the entriesSize
-            int entriesSize = entries.size();
+            final int entriesSize = entries.size();
             oos.writeObject(Integer.valueOf(entriesSize));
             //then write out the entries
-            Iterator it = entries.iterator();
-            while(it.hasNext()) {
+            final Iterator it = entries.iterator();
+            while (it.hasNext()) {
                 oos.writeObject(it.next());
             }
             oos.close();
             oos = null;
 
             obs = bos.toByteArray();
-        }
-        finally {
-            if ( oos != null )  {
+        } finally {
+            if (oos != null) {
                 oos.close();
             }
         }
 
         return obs;
     }
-    
+
     /**
-    * Given a byte[] containing session data, return a session
-    * object
-    *
-    * @param state
-    *   The byte[] with the session attribute data
-    *
-    * @return
-    *   A newly created object for the given session attribute data
-    */
-    protected Object getAttributeValueCollection(byte[] state) 
-        throws IOException, ClassNotFoundException 
-    {
-        Collection<Object> attributeValueList = new ArrayList<Object>();
+     * Given a byte[] containing session data, return a session
+     * object
+     *
+     * @param state The byte[] with the session attribute data
+     * @return A newly created object for the given session attribute data
+     */
+    protected Object getAttributeValueCollection(final byte[] state)
+        throws IOException, ClassNotFoundException {
+        final Collection<Object> attributeValueList = new ArrayList<Object>();
         BufferedInputStream bis = null;
         ByteArrayInputStream bais = null;
-        Loader loader = null;    
+        Loader loader = null;
         ClassLoader classLoader = null;
         ObjectInputStream ois = null;
-        Container container = manager.getContainer();
-            
-        try
-        {
+        final Container container = this.manager.getContainer();
+
+        try {
             bais = new ByteArrayInputStream(state);
             bis = new BufferedInputStream(bais);
-            
+
             if (container != null) {
                 loader = container.getLoader();
             }
@@ -685,96 +660,87 @@ public class ReplicationAttributeStore extends ReplicationStore {
             if (loader != null) {
                 classLoader = loader.getClassLoader();
             }
-            
+
             if (classLoader != null) {
 
                 try {
-                    ois = ioUtils.createObjectInputStream(bis, true, classLoader, getUniqueId());
-                } catch (Exception ex) {}
+                    ois = this.ioUtils.createObjectInputStream(bis, true, classLoader, getUniqueId());
+                } catch (final Exception ex) {
+                }
 
             }
             if (ois == null) {
-                ois = new ObjectInputStream(bis); 
+                ois = new ObjectInputStream(bis);
             }
-            if(ois != null) {
+            if (ois != null) {
                 try {
                     //first get List size
-                    Object whatIsIt = ois.readObject();
+                    final Object whatIsIt = ois.readObject();
                     int entriesSize = 0;
-                    if(whatIsIt instanceof Integer) {
-                        entriesSize = ((Integer)whatIsIt).intValue();
+                    if (whatIsIt instanceof Integer) {
+                        entriesSize = ((Integer) whatIsIt).intValue();
                     }
                     for (int i = 0; i < entriesSize; i++) {
-                        Object nextAttributeValue = ois.readObject();
+                        final Object nextAttributeValue = ois.readObject();
                         attributeValueList.add(nextAttributeValue);
                     }
-                } 
-                finally {
+                } finally {
                     try {
                         ois.close();
                         bis = null;
-                    }
-                    catch (IOException e) {
+                    } catch (final IOException e) {
                     }
                 }
             }
-        }
-        catch(ClassNotFoundException e)
-        {
+        } catch (final ClassNotFoundException e) {
             if (_logger.isLoggable(Level.FINE)) {
                 _logger.log(Level.FINE, "ClassNotFoundException occurred in getAttributeValueCollection", e);
             }
             throw e;
-        }
-        catch(IOException e)
-        {
+        } catch (final IOException e) {
             throw e;
-        }      
+        }
 
         return attributeValueList;
-    }    
-    
+    }
+
     //end new serialization code for Collection
 
     /**
-    * Given a session, load its attributes
-    *
-    * @param modifiedAttributeSession
-    *   The session (header info only) having its attributes loaded
-    *
-    * @param attributeList
-    *   The List<AttributeMetadata> list of loaded attributes
-    *
-    * @return
-    *   A newly created object for the given session attribute data
-    */    
-    protected void loadAttributes(ModifiedAttributeHASession modifiedAttributeSession, 
-            Collection attributeList) {
-        if(_logger.isLoggable(Level.FINEST)) {
+     * Given a session, load its attributes
+     *
+     * @param modifiedAttributeSession The session (header info only) having its attributes loaded
+     * @param attributeList            The List<AttributeMetadata> list of loaded attributes
+     * @return A newly created object for the given session attribute data
+     */
+    protected void loadAttributes(final ModifiedAttributeHASession modifiedAttributeSession,
+                                  final Collection attributeList) {
+        if (_logger.isLoggable(Level.FINEST)) {
             _logger.finest("in loadAttributes -- ReplicationAttributeStore : session id=" + modifiedAttributeSession.getIdInternal());
         }
 
         String thisAttrName = null;
         //SessionAttributeMetadata.Operation thisAttrOp = null;
         Object thisAttrVal = null;
-        Iterator it = attributeList.iterator();
-        while (it.hasNext()) { 
-            SessionAttributeMetadata nextAttrMetadata = (SessionAttributeMetadata)it.next();
+        final Iterator it = attributeList.iterator();
+        while (it.hasNext()) {
+            final SessionAttributeMetadata nextAttrMetadata = (SessionAttributeMetadata) it.next();
             thisAttrName = nextAttrMetadata.getAttributeName();
             //thisAttrOp = nextAttrMetadata.getOperation();
-            byte[] nextAttrState = nextAttrMetadata.getState();
+            final byte[] nextAttrState = nextAttrMetadata.getState();
             thisAttrVal = null;
-            try { 
+            try {
                 thisAttrVal = getAttributeValue(nextAttrState);
-            } catch (ClassNotFoundException ex1) {
+            } catch (final ClassNotFoundException ex1) {
                 //FIXME log?
-            } catch (IOException ex2) {}
-            if(_logger.isLoggable(Level.FINEST)) {
+            } catch (final IOException ex2) {
+            }
+            if (_logger.isLoggable(Level.FINEST)) {
                 _logger.finest("Attr retrieved======" + thisAttrName);
             }
 
-            if(thisAttrVal != null) { //start if
-                if(_logger.isLoggable(Level.FINEST)) {
+            if (thisAttrVal != null) { //start if
+                if (_logger.isLoggable(Level.FINEST)) {
                     _logger.finest("Setting Attribute: " + thisAttrName);
                 }
                 modifiedAttributeSession.setAttribute(thisAttrName, thisAttrVal);
@@ -805,13 +771,14 @@ public class ReplicationAttributeStore extends ReplicationStore {
 */
 
 
-    private Collection deserializeStatesCollection(byte[] entriesState) {
+    private Collection deserializeStatesCollection(final byte[] entriesState) {
         Collection result = new ArrayList();
         try {
-            result = (Collection)getAttributeValueCollection(entriesState);
-        } catch (ClassNotFoundException ex1) {
+            result = (Collection) getAttributeValueCollection(entriesState);
+        } catch (final ClassNotFoundException ex1) {
             // FIXME log?
-        } catch (IOException ex2) {}        
+        } catch (final IOException ex2) {
+        }
         return result;
     } 
     
