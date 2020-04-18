@@ -508,23 +508,23 @@ public class ReplicationAttributeStore extends ReplicationStore {
      */
     protected Object getAttributeValue(final byte[] state)
         throws IOException, ClassNotFoundException {
-        Loader loader = null;
-        ClassLoader classLoader = null;
-        ObjectInputStream ois = null;
         final Container container = this.manager.getContainer();
 
         try {
             final ByteArrayInputStream bais = new ByteArrayInputStream(state);
             final BufferedInputStream bis = new BufferedInputStream(bais);
 
+            Loader loader = null;
             if (container != null) {
                 loader = container.getLoader();
             }
 
+            ClassLoader classLoader = null;
             if (loader != null) {
                 classLoader = loader.getClassLoader();
             }
 
+            ObjectInputStream ois = null;
             if (classLoader != null) {
                 try {
                     ois = this.ioUtils.createObjectInputStream(bis, true, classLoader, getUniqueId());
