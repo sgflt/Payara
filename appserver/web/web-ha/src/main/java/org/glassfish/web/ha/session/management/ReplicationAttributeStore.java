@@ -180,7 +180,9 @@ public class ReplicationAttributeStore extends ReplicationStore {
             modAttrSession.resetAttributeState();
             postSaveUpdate(modAttrSession);
         } catch (final BackingStoreException ex) {
-            //FIXME
+            if (_logger.isLoggable(Level.SEVERE)) {
+                _logger.severe("doValveSave failed " + ex);
+            }
         }
     }
 
@@ -223,7 +225,9 @@ public class ReplicationAttributeStore extends ReplicationStore {
             modAttrSession.resetAttributeState();
             postSaveUpdate(modAttrSession);
         } catch (final BackingStoreException ex) {
-            //FIXME
+            if (_logger.isLoggable(Level.SEVERE)) {
+                _logger.severe("doSave failed " + ex);
+            }
         }
     }
 
@@ -247,9 +251,7 @@ public class ReplicationAttributeStore extends ReplicationStore {
             validateAndSave(session);
             return session;
         } catch (final BackingStoreException ex) {
-            final IOException ex1 =
-                new IOException("Error during load: " + ex.getMessage(), ex);
-            throw ex1;
+            throw new IOException("Error during load: " + ex.getMessage(), ex);
         }
     }
 
@@ -721,12 +723,15 @@ public class ReplicationAttributeStore extends ReplicationStore {
             //thisAttrOp = nextAttrMetadata.getOperation();
             final byte[] nextAttrState = nextAttrMetadata.getState();
             thisAttrVal = null;
+
             try {
                 thisAttrVal = getAttributeValue(nextAttrState);
-            } catch (final ClassNotFoundException ex1) {
-                //FIXME log?
-            } catch (final IOException ex2) {
+            } catch (final ClassNotFoundException | IOException e) {
+                if (_logger.isLoggable(Level.SEVERE)) {
+                    _logger.severe("loadAttributes failed " + e);
+                }
             }
+
             if (_logger.isLoggable(Level.FINEST)) {
                 _logger.finest("Attr retrieved======" + thisAttrName);
             }
@@ -744,12 +749,15 @@ public class ReplicationAttributeStore extends ReplicationStore {
 
     private Collection deserializeStatesCollection(final byte[] entriesState) {
         Collection result = new ArrayList();
+
         try {
             result = (Collection) getAttributeValueCollection(entriesState);
-        } catch (final ClassNotFoundException ex1) {
-            // FIXME log?
-        } catch (final IOException ex2) {
+        } catch (final ClassNotFoundException | IOException e) {
+            if (_logger.isLoggable(Level.SEVERE)) {
+                _logger.severe("loadAttributes failed " + e);
+            }
         }
+
         return result;
     }
 }
