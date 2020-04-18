@@ -45,7 +45,6 @@ import com.sun.enterprise.container.common.spi.util.JavaEEIOUtils;
 import org.apache.catalina.Container;
 import org.apache.catalina.Loader;
 import org.apache.catalina.Session;
-import org.apache.catalina.session.StandardSession;
 import org.glassfish.ha.store.api.BackingStore;
 import org.glassfish.ha.store.api.BackingStoreException;
 
@@ -137,14 +136,14 @@ public class ReplicationAttributeStore extends ReplicationStore {
     @Override
     public void doValveSave(final Session session) throws IOException {
         if (_logger.isLoggable(Level.FINE)) {
-            _logger.fine("ReplicationAttributeStore>>doValveSave:valid =" + ((StandardSession) session).getIsValid());
+            _logger.fine("ReplicationAttributeStore>>doValveSave:valid =" + session.getIsValid());
             if (session instanceof HASession) {
-                _logger.fine("ReplicationAttributeStore>>valveSave:ssoId=" + ((HASession) session).getSsoId());
+                _logger.fine("ReplicationAttributeStore>>valveSave:ssoId=" + session.getSsoId());
             }
         }
 
         // begin 6470831 do not save if session is not valid
-        if (!((StandardSession) session).getIsValid()) {
+        if (!session.getIsValid()) {
             return;
         }
         // end 6470831
@@ -192,7 +191,7 @@ public class ReplicationAttributeStore extends ReplicationStore {
     @Override
     public void doSave(final Session session) throws IOException {
         // begin 6470831 do not save if session is not valid
-        if (!((StandardSession) session).getIsValid()) {
+        if (!session.getIsValid()) {
             return;
         }
 
@@ -246,7 +245,7 @@ public class ReplicationAttributeStore extends ReplicationStore {
             return session;
         } catch (final BackingStoreException ex) {
             final IOException ex1 =
-                (IOException) new IOException("Error during load: " + ex.getMessage()).initCause(ex);
+                (IOException) new IOException("Error during load: " + ex.getMessage(), ex);
             throw ex1;
         }
     }
@@ -332,7 +331,7 @@ public class ReplicationAttributeStore extends ReplicationStore {
             }
         } catch (final ClassNotFoundException e) {
             final IOException ex1 = (IOException) new IOException(
-                "Error during deserialization: " + e.getMessage()).initCause(e);
+                "Error during deserialization: " + e.getMessage(), e);
             throw ex1;
         } catch (final IOException e) {
             throw e;
@@ -463,7 +462,7 @@ public class ReplicationAttributeStore extends ReplicationStore {
         byte[] nextValue = null;
         for (int i = 0; i < attrList.size(); i++) {
             nextAttrName = attrList.get(i);
-            nextAttrValue = ((StandardSession) modAttrSession).getAttribute(nextAttrName);
+            nextAttrValue = modAttrSession.getAttribute(nextAttrName);
             nextValue = null;
             try {
                 nextValue = getByteArray(nextAttrValue);
