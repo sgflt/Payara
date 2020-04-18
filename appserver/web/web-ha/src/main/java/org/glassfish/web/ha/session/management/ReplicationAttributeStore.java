@@ -429,12 +429,14 @@ public class ReplicationAttributeStore extends ReplicationStore {
         addToEntries(modAttrSession, entries,
             SessionAttributeMetadata.Operation.DELETE, deletedAttrs);
 
-        final CompositeMetadata result
-            = new CompositeMetadata(modAttrSession.getVersion(),
+        return new CompositeMetadata(
+            modAttrSession.getVersion(),
             modAttrSession.getLastAccessedTimeInternal(),
             modAttrSession.getMaxInactiveInterval() * 1000L,
-            entries, trunkState, null);
-        return result;
+            entries,
+            trunkState,
+            null
+        );
     }
 
     private void printAttrList(final String attrListType, final List<String> attrList) {
