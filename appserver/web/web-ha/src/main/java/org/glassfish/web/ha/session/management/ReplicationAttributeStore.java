@@ -59,7 +59,6 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -564,53 +563,6 @@ public class ReplicationAttributeStore extends ReplicationStore {
     }
 
     //new serialization code for Collection
-
-    /**
-     * Create an byte[] for the session that we can then pass to
-     * the HA Store.
-     *
-     * @param entries The Collection of entries we are serializing
-     */
-    protected byte[] getByteArrayFromCollection(final Collection entries)
-        throws IOException {
-        ByteArrayOutputStream bos = null;
-        ObjectOutputStream oos = null;
-
-
-        byte[] obs;
-        try {
-            bos = new ByteArrayOutputStream();
-
-
-            try {
-                oos = this.ioUtils.createObjectOutputStream(new BufferedOutputStream(bos), true);
-            } catch (final Exception ex) {
-            }
-
-            //use normal ObjectOutputStream if there is a failure during stream creation
-            if (oos == null) {
-                oos = new ObjectOutputStream(new BufferedOutputStream(bos));
-            }
-            //first write out the entriesSize
-            final int entriesSize = entries.size();
-            oos.writeObject(Integer.valueOf(entriesSize));
-            //then write out the entries
-            final Iterator it = entries.iterator();
-            while (it.hasNext()) {
-                oos.writeObject(it.next());
-            }
-            oos.close();
-            oos = null;
-
-            obs = bos.toByteArray();
-        } finally {
-            if (oos != null) {
-                oos.close();
-            }
-        }
-
-        return obs;
-    }
 
     /**
      * Given a byte[] containing session data, return a session
