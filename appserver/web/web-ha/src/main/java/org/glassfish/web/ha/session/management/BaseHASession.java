@@ -66,9 +66,9 @@ import java.util.Enumeration;
  * @author  Rajiv Mordani
  */
 public abstract class BaseHASession extends StandardSession
-        implements HASession {
+    implements HASession {
 
-    protected String userName="";
+    protected String userName = "";
     protected boolean persistentFlag = false;
 
     /** Creates a new instance of BaseHASession */
@@ -81,6 +81,7 @@ public abstract class BaseHASession extends StandardSession
      *
      * @param id The new session identifier
      */
+    @Override
     public void setId(String id) {
         super.setId(id);
 
@@ -98,13 +99,16 @@ public abstract class BaseHASession extends StandardSession
      * store framework calls this method
      * so it must be there but must not have
      * any effect
+     *
      * @param value
      */
+    @Override
     public abstract void setDirty(boolean value);
 
     /**
      * is the session persistent
      */
+    @Override
     public boolean isPersistent() {
         return persistentFlag;
     }
@@ -112,6 +116,7 @@ public abstract class BaseHASession extends StandardSession
     /**
      * this sets the persistent flag
      */
+    @Override
     public void setPersistent(boolean value) {
         persistentFlag = value;
     }
@@ -119,6 +124,7 @@ public abstract class BaseHASession extends StandardSession
     /**
      * this returns the user name
      */
+    @Override
     public String getUserName() {
         return userName;
     }
@@ -126,6 +132,7 @@ public abstract class BaseHASession extends StandardSession
     /**
      * this sets the user name
      */
+    @Override
     public void setUserName(String value) {
         userName = value;
     }
@@ -135,6 +142,7 @@ public abstract class BaseHASession extends StandardSession
      *
      * @param principal The new Principal, or <code>null</code> if none
      */
+    @Override
     public void setPrincipal(Principal principal) {
         super.setPrincipal(principal);
         this.setDirty(true);
@@ -144,7 +152,7 @@ public abstract class BaseHASession extends StandardSession
         return persistentFlag;
     }
 
-
+    @Override
     public void recycle() {
         super.recycle();
         userName = "";
@@ -159,6 +167,7 @@ public abstract class BaseHASession extends StandardSession
         }
     }
 
+    @Override
     public void sync() {
 
         HttpSessionBindingEvent event = null;
