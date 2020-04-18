@@ -96,17 +96,6 @@ public abstract class BaseHASession extends StandardSession
     }
 
     /**
-     * this is deliberately a no-op
-     * store framework calls this method
-     * so it must be there but must not have
-     * any effect
-     *
-     * @param value
-     */
-    @Override
-    public abstract void setDirty(boolean value);
-
-    /**
      * is the session persistent
      */
     @Override
