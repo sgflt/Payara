@@ -279,7 +279,7 @@ public class ReplicationAttributeStore extends ReplicationStore {
             return null;
         }
         final byte[] state = metadata.getState();
-        Session _session = null;
+        Session session = null;
         Loader loader = null;
         ClassLoader classLoader = null;
         ObjectInputStream ois = null;
@@ -320,7 +320,7 @@ public class ReplicationAttributeStore extends ReplicationStore {
 
             if (ois != null) {
                 try {
-                    _session = readSession(this.manager, ois);
+                    session = readSession(this.manager, ois);
                 } finally {
 
                     try {
@@ -334,8 +334,8 @@ public class ReplicationAttributeStore extends ReplicationStore {
             throw new IOException("Error during deserialization: " + e.getMessage(), e);
         }
 
-        final String username = ((HASession) _session).getUserName();
-        if ((username != null) && (!username.equals("")) && _session.getPrincipal() == null) {
+        final String username = ((HASession) session).getUserName();
+        if ((username != null) && (!username.equals("")) && session.getPrincipal() == null) {
             if (this._debug > 0) {
                 debug("Username retrieved is " + username);
             }
@@ -345,31 +345,31 @@ public class ReplicationAttributeStore extends ReplicationStore {
                 debug("principal created using username  " + pal);
             }
             if (pal != null) {
-                _session.setPrincipal(pal);
+                session.setPrincipal(pal);
                 if (this._debug > 0) {
-                    debug("getSession principal=" + pal + " was added to session=" + _session);
+                    debug("getSession principal=" + pal + " was added to session=" + session);
                 }
             }
         }
         //--SRI        
 
-        _session.setNew(false);
+        session.setNew(false);
         if (_logger.isLoggable(Level.FINE)) {
             _logger.fine("ReplicationAttributeStore>>ssoId=" + ssoId);
         }
 
-        ((HASession) _session).setVersion(version);
-        ((HASession) _session).setDirty(false);
+        ((HASession) session).setVersion(version);
+        ((HASession) session).setDirty(false);
 
         //now load entries from deserialized entries collection
-        ((ModifiedAttributeHASession) _session).clearAttributeStates();
+        ((ModifiedAttributeHASession) session).clearAttributeStates();
         final byte[] entriesState = metadata.getState();
         if (entriesState != null) {
             final Collection<?> entries = this.deserializeStatesCollection(entriesState);
-            loadAttributes((ModifiedAttributeHASession) _session, entries);
+            loadAttributes((ModifiedAttributeHASession) session, entries);
         }
-        loadAttributes((ModifiedAttributeHASession) _session, metadata.getEntries());
-        return _session;
+        loadAttributes((ModifiedAttributeHASession) session, metadata.getEntries());
+        return session;
     }
 
 
