@@ -1042,7 +1042,7 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
         add(session);
         ((StandardSession) session).activate();
 
-        return (session);
+        return session;
 
     }
 
