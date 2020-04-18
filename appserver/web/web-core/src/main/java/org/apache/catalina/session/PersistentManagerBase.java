@@ -1327,7 +1327,7 @@ public abstract class PersistentManagerBase extends ManagerBase implements Lifec
         final Session[] sessions = findSessions();
 
         // FIXME: Smarter algorithm (LRU)
-        if (getMaxActiveSessions() >= sessions.length) {
+        if (sessions.length <= getMaxActiveSessions()) {
             return;
         }
 
