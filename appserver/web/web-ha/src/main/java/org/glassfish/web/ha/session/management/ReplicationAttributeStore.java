@@ -451,13 +451,9 @@ public class ReplicationAttributeStore extends ReplicationStore {
     private void addToEntries(final ModifiedAttributeHASession modAttrSession,
                               final List<SessionAttributeMetadata> entries, final SessionAttributeMetadata.Operation op,
                               final List<String> attrList) {
-        String nextAttrName = null;
-        Object nextAttrValue = null;
-        byte[] nextValue = null;
-        for (int i = 0; i < attrList.size(); i++) {
-            nextAttrName = attrList.get(i);
-            nextAttrValue = modAttrSession.getAttribute(nextAttrName);
-            nextValue = null;
+        for (final String nextAttrName : attrList) {
+            final Object nextAttrValue = modAttrSession.getAttribute(nextAttrName);
+            byte[] nextValue = null;
             try {
                 nextValue = getByteArray(nextAttrValue);
             } catch (final IOException ex) {
