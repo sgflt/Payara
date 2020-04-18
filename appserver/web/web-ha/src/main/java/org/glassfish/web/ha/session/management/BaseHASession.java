@@ -138,10 +138,6 @@ public abstract class BaseHASession extends StandardSession
         this.setDirty(true);
     }
 
-    public boolean isPersistentFlag() {
-        return persistentFlag;
-    }
-
     @Override
     public void recycle() {
         super.recycle();
