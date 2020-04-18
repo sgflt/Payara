@@ -46,7 +46,7 @@ import org.apache.catalina.Manager;
  * @author lwhite
  * @author Rajiv Mordani
  */
-public class ModifiedHASession extends BaseHASession {
+class ModifiedHASession extends BaseHASession {
 
     private transient boolean dirtyFlag = false;
 
@@ -54,7 +54,7 @@ public class ModifiedHASession extends BaseHASession {
     /**
      * Creates a new instance of ModifiedHASession
      */
-    public ModifiedHASession(Manager manager) {
+    ModifiedHASession(final Manager manager) {
         super(manager);
     }
 
@@ -66,7 +66,7 @@ public class ModifiedHASession extends BaseHASession {
      * @param value to set
      */
     @Override
-    public void setAttribute(String name, Object value) {
+    public void setAttribute(final String name, final Object value) {
         super.setAttribute(name, value);
         this.setDirty(true);
     }
@@ -78,7 +78,7 @@ public class ModifiedHASession extends BaseHASession {
      * @param name of attribute
      */
     @Override
-    public void removeAttribute(String name) {
+    public void removeAttribute(final String name) {
         super.removeAttribute(name);
         this.setDirty(true);
     }
@@ -89,7 +89,7 @@ public class ModifiedHASession extends BaseHASession {
     }
 
     @Override
-    public void setDirty(boolean isDirty) {
+    public void setDirty(final boolean isDirty) {
         this.dirtyFlag = isDirty;
     }
 }
