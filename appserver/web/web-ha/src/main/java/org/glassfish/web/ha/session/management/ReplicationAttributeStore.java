@@ -148,8 +148,7 @@ public class ReplicationAttributeStore extends ReplicationStore {
         }
         // end 6470831
 
-        if (!(session instanceof ModifiedAttributeHASession) ||
-            !(session instanceof BaseHASession)) {
+        if (!(session instanceof ModifiedAttributeHASession)) {
             return;
         }
 
