@@ -43,48 +43,38 @@ package org.glassfish.web.ha.session.management;
 import org.apache.catalina.Session;
 
 /**
- *
- * @author  lwhite
+ * @author lwhite
  * @author Rajiv Mordani
  */
 public interface HASession extends Session {
-    
-    /** 
+
+    /**
      * this returns the dirty flag
      */
     boolean isDirty();
-    
-    /** 
+
+    /**
      * this sets the dirty flag
+     *
      * @param value
      */
     void setDirty(boolean value);
 
-    /** 
-     * this sets the ssoId
-     * @param ssoId
-     */
-    void setSsoId(String ssoId);
-    
-    /** 
-     * this returns the ssoId
-     */
-    String getSsoId();
-    
-    /** 
+    /**
      * this returns the user name
      */
     String getUserName();
-    
-    /** 
+
+    /**
      * this sets the user name
+     *
      * @param userName
      */
     void setUserName(String userName);
-    
-    void sync();
-    long incrementVersion();
+
     void setVersion(long value);
+
     boolean isPersistent();
+
     void setPersistent(boolean value);
 }

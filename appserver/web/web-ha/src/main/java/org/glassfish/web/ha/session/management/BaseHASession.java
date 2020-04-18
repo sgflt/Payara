@@ -49,10 +49,8 @@ package org.glassfish.web.ha.session.management;
 
 import org.apache.catalina.Globals;
 import org.apache.catalina.Manager;
-import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.session.StandardSession;
 
-import javax.servlet.http.HttpSessionBindingEvent;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -142,17 +140,6 @@ abstract class BaseHASession extends StandardSession implements HASession {
         this.userName = "";
         this.ssoId = "";
         this.persistentFlag = false;
-    }
-
-    @Override
-    public void sync() {
-        final HttpSessionBindingEvent event = new HttpSessionBindingEvent(this, null, null);
-
-        // Notify special event listeners on sync()
-        final Manager manager = this.getManager();
-        final StandardContext stdContext = (StandardContext) manager.getContainer();
-        // fire container event
-        stdContext.fireContainerEvent("sessionSync", event);
     }
 
     /**
