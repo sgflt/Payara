@@ -146,13 +146,6 @@ public abstract class BaseHASession extends StandardSession
         this.persistentFlag = false;
     }
 
-    public void save() {
-        final ReplicationManagerBase manager = (ReplicationManagerBase) getManager();
-        if (manager != null) {
-            manager.doValveSave(this);
-        }
-    }
-
     @Override
     public void sync() {
 
