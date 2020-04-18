@@ -456,7 +456,10 @@ public class ReplicationAttributeStore extends ReplicationStore {
             byte[] nextValue = null;
             try {
                 nextValue = getByteArray(nextAttrValue);
-            } catch (final IOException ex) {
+            } catch (final IOException e) {
+                if (_logger.isLoggable(Level.SEVERE)) {
+                    _logger.severe("addToEntries failed " + e);
+                }
             }
             final SessionAttributeMetadata nextAttrMetadata
                 = new SessionAttributeMetadata(nextAttrName, op, nextValue);
