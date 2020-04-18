@@ -154,11 +154,12 @@ public class ReplicationAttributeStore extends ReplicationStore {
 
         final ModifiedAttributeHASession modAttrSession
             = (ModifiedAttributeHASession) session;
-        String userName = "";
+
         if (session.getPrincipal() != null) {
-            userName = session.getPrincipal().getName();
+            final String userName = session.getPrincipal().getName();
             ((BaseHASession) session).setUserName(userName);
         }
+
         final BackingStore<String, CompositeMetadata> replicator = getCompositeMetadataBackingStore();
         if (_logger.isLoggable(Level.FINE)) {
             _logger.fine("ReplicationAttributeStore>>save: replicator: " + replicator);
